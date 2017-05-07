@@ -6,14 +6,13 @@ resolver: lts-8.5
 # Local packages, usually specified by relative directory name
 packages:
 - '.'
-- location: /home/roman/OpenCog/Iso/
- # git: https://github.com/rTreutlein/IsoSyntax
- # commit: 8617eadbcd7767b81b528a1fa9e44596c7252fa0
- #extra-dep: true
+- location:
+   git: https://github.com/rTreutlein/IsoSyntax
+   commit: ee1fe4282dfd7dab750985835cdd5045692c4955
+  extra-dep: true
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
-extra-deps: [opencog-atomspace-0.1.0.8
-            ,list-tries-0.6.3]
+extra-deps: [list-tries-0.6.3]
 
 # Override default flag values for local packages and extra-deps
 flags: {}
