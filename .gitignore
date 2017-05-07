@@ -18,10 +18,8 @@ cabal.sandbox.config
 .stack-work/
 cabal.project.local
 README.md
-cmavo.csv
 cmavo_tiny.csv
 defs.txt
-gismu.csv
 gismu_tiny.csv
 lojban.xml
 wordlist.cache
