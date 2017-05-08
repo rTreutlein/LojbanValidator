@@ -6,9 +6,9 @@ resolver: lts-8.5
 # Local packages, usually specified by relative directory name
 packages:
 - '.'
-- location:
+- location: #/home/roman/OpenCog/Iso/
    git: https://github.com/rTreutlein/IsoSyntax
-   commit: ee1fe4282dfd7dab750985835cdd5045692c4955
+   commit: 98a7ed254b3670f2869ee35cfae4a491a7376e99
   extra-dep: true
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)

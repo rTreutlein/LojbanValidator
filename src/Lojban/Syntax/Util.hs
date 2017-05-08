@@ -12,6 +12,7 @@ import Data.Maybe
 import Data.Map (findWithDefault)
 
 import Control.Category
+import Control.Arrow
 import Control.Applicative hiding (many,some,optional)
 import Control.Monad
 import Control.Monad.RWS.Class
@@ -19,8 +20,9 @@ import Control.Monad.Trans.Class
 
 import System.Random
 
-import Iso hiding (SynIso,Syntax)
-import qualified Iso
+import Iso
+import Syntax hiding (SynIso,Syntax)
+import qualified Syntax
 
 import Lojban.Syntax.Types
 
@@ -49,7 +51,7 @@ listoptional syn = maybeToList <<< optional syn
             g [] = Nothing
             g a = Just a
 
-stripSpace :: SynMonad t s => Iso.SynIso t String String
+stripSpace :: SynMonad t s => Syntax.SynIso t String String
 stripSpace = mkIso f g where
     f [] = []
     f (' ':xs) = f xs

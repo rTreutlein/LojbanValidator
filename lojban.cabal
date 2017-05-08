@@ -17,8 +17,8 @@ library
   hs-source-dirs:      src
   exposed-modules:     Lojban
                        , Lojban.Syntax.Util
-  other-modules:        Lojban.WordList
-                       , Lojban.Valid
+  other-modules:       Lojban.WordList
+                       , Lojban.Syntax
                        , Lojban.Syntax.Types
   build-depends:       base >= 4.7 && < 5
                        , Iso
@@ -28,7 +28,6 @@ library
                        , containers
                        , unordered-containers
                        , transformers
-                       , hxt
                        , split
                        , hashable
                        , list-tries

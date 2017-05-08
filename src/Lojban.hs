@@ -9,8 +9,8 @@ module Lojban
 , validateLojban
 ) where
 
-import Lojban.Valid
 import Lojban.WordList
+import Lojban.Syntax
 import Lojban.Syntax.Types
 
 import Control.Monad.IO.Class

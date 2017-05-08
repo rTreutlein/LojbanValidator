@@ -15,7 +15,7 @@ import Data.Serialize
 import Lojban.Syntax.Util
 import Lojban.Syntax.Types
 
-import Iso (SyntaxState)
+import Syntax (SyntaxState)
 
 import Data.ListTrie.Patricia.Set.Ord as TS
 
