@@ -154,7 +154,19 @@ sumti_6 = adtSyntax "sumti_6" <<<
     <+> adtSelmaho "ZO" &+& any_word &+& listoptional (concatSome free)
     <+> adtSelmaho "LU" &+& text &+& listoptional (adtSelmaho "LIhU" &+& listoptional (concatSome free))
     <+> adtSelmaho "LOhU" &+& concatSome any_word &+& adtSelmaho "LEhU" &+& listoptional (concatSome free)
-    <+> adtSelmaho "ZOI" &+& any_word &+& anything &+& any_word &+& listoptional (concatSome free)
+    <+> adtSelmaho "ZOI" &+& handleZOI &+& listoptional (concatSome free)
+
+handleZOI :: SyntaxState s => Syntax s [ADT]
+handleZOI = Iso f g where
+    f () = do
+        word <- apply anyWord ()
+        any <- apply (isoConcat . manyTill any_word (ignore word <<< string word)) ()
+        pure $ (Leaf word):(any ++ [Leaf word])
+    g (word:any) = do
+        unapply any_word [word]
+        unapply (concatMany any_word) (init any)
+        unapply any_word [word]
+        pure ()
 
 sumti_tail :: SyntaxState s => Syntax s [ADT]
 sumti_tail = adtSyntax "sumti_tail" <<< listoptional (sumti_6 &+& listoptional relative_clauses) &+& sumti_tail_1

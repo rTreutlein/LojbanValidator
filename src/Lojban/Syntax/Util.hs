@@ -103,11 +103,6 @@ anyWord = some letter <&& sepSpace
 any_word :: SyntaxState s => Syntax s [ADT]
 any_word = wrapLeaf anyWord
 
-anything :: SyntaxState s => Syntax s a
-anything = Iso f g where
-    f _ = lift $ Left "Can't parse anything don't know when to stop"
-    g _ = lift $ Left "Can't print anything don't know when to stop"
-
 word :: SyntaxState s => String -> Syntax s String
 word s = string s <&& sepSpace
 
