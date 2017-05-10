@@ -6,7 +6,7 @@ import qualified Prelude as P
 
 import Lojban
 import Lojban.WordList
-import Lojban.Valid
+import Lojban.Syntax
 import Lojban.Syntax.Util
 import Lojban.Syntax.Types
 

@@ -26,13 +26,19 @@ lojban :: SyntaxState s => Syntax s [ADT]
 lojban = finalCheck . text
 
 text :: SyntaxState s => Syntax s [ADT]
-text = adtSyntax "text" <<< concatMany ((adtSelmaho "NAI")) &+& concatMany ((wrapLeaf cmene) &+& listoptional (concatSome free)
-    <+> (indicators <&> concatSome free)) &+& listoptional joik_jek &+& text_1
+text = adtSyntax "text" <<<
+    concatMany ((adtSelmaho "NAI")) &+& concatMany ((wrapLeaf cmene)
+                                    &+& listoptional (concatSome free)
+    <+> (indicators <&> concatSome free)) &+& listoptional joik_jek
+                                          &+& text_1
 
 text_1 :: SyntaxState s => Syntax s [ADT]
-text_1 = adtSyntax "text_1" <<< concatMany (((adtSelmaho "I" &+& listoptional (jek
-    <+> joik) &+& listoptional (listoptional stag &+& adtSelmaho "BO") &+& listoptional (concatSome free)))
-    <+> concatSome (adtSelmaho "NIhO") &+& listoptional (concatSome free)) &+& listoptional paragraphs
+text_1 = adtSyntax "text_1" <<<
+    concatMany (((adtSelmaho "I" &+& listoptional (jek <+> joik)
+                                 &+& listoptional (listoptional stag &+& adtSelmaho "BO")
+                                 &+& listoptional (concatSome free)))
+    <+> concatSome (adtSelmaho "NIhO") &+& listoptional (concatSome free))
+                                       &+& listoptional paragraphs
 
 paragraphs :: SyntaxState s => Syntax s [ADT]
 paragraphs = adtSyntax "paragraphs" <<< paragraph &+& concatMany ((adtSelmaho "NIhO") &+& listoptional (concatSome free) &+& paragraphs)
@@ -406,11 +412,12 @@ vocative :: SyntaxState s => Syntax s [ADT]
 vocative = adtSyntax "vocative" <<< concatSome ((adtSelmaho "COI" &+& listoptional (adtSelmaho "NAI"))) <&> adtSelmaho "DOI"
 
 indicators :: SyntaxState s => Syntax s [ADT]
-indicators = adtSyntax "indicators" <<< listoptional (adtSelmaho "FUhE") &+& concatSome indicator
+indicators = adtSyntax "indicators" <<<
+    listoptional (adtSelmaho "FUhE") &+& concatSome indicator
 
 indicator :: SyntaxState s => Syntax s [ADT]
-indicator = adtSyntax "indicator" <<< (adtSelmaho "UI"
-    <+> adtSelmaho "CAI") &+& listoptional (adtSelmaho "NAI")
+indicator = adtSyntax "indicator" <<<
+    (adtSelmaho "UI" <+> adtSelmaho "CAI") &+& listoptional (adtSelmaho "NAI")
     <+> adtSelmaho "Y"
     <+> adtSelmaho "DAhO"
     <+> adtSelmaho "FUhO"
