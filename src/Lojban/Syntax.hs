@@ -27,7 +27,7 @@ lojban = finalCheck . text
 
 text :: SyntaxState s => Syntax s [ADT]
 text = adtSyntax "text" <<<
-    concatMany ((adtSelmaho "NAI")) &+& concatMany ((wrapLeaf cmene)
+    concatMany ((adtSelmaho "NAI")) &+& concatMany (lojban_word (wrapLeaf cmene)
                                     &+& listoptional (concatSome free)
     <+> (indicators <&> concatSome free)) &+& listoptional joik_jek
                                           &+& text_1
@@ -153,7 +153,7 @@ sumti_6 = adtSyntax "sumti_6" <<<
     (adtSelmaho "LAhE" &+& listoptional (concatSome free) <+> adtSelmaho "NAhE" &+& adtSelmaho "BO" &+& listoptional (concatSome free)) &+& listoptional relative_clauses &+& sumti &+& listoptional (adtSelmaho "LUhU" &+& listoptional (concatSome free))
     <+> adtSelmaho "KOhA" &+& listoptional (concatSome free)
     <+> lerfu_string &+& listoptional (adtSelmaho "BOI" &+& listoptional (concatSome free))
-    <+> adtSelmaho "LA" &+& listoptional (concatSome free) &+& listoptional relative_clauses &+& concatSome (wrapLeaf cmene) &+& listoptional (concatSome free)
+    <+> adtSelmaho "LA" &+& listoptional (concatSome free) &+& listoptional relative_clauses &+& concatSome (lojban_word (wrapLeaf cmene)) &+& listoptional (concatSome free)
     <+> (adtSelmaho "LA"
     <+> adtSelmaho "LE") &+& listoptional (concatSome free) &+& sumti_tail &+& listoptional (adtSelmaho "KU" &+& listoptional (concatSome free))
     <+> adtSelmaho "LI" &+& listoptional (concatSome free) &+& mex &+& listoptional (adtSelmaho "LOhO" &+& listoptional (concatSome free))
@@ -412,7 +412,7 @@ free = adtSyntax "free" <<<
                  &+& listoptional relative_clauses
                  &+& listoptional (adtSelmaho "DOhU")
     <+> vocative &+& listoptional relative_clauses
-                 &+& concatSome (wrapLeaf cmene)
+                 &+& concatSome (lojban_word (wrapLeaf cmene))
                  &+& listoptional (concatSome free)
                  &+& listoptional relative_clauses
                  &+& listoptional (adtSelmaho "DOhU")
