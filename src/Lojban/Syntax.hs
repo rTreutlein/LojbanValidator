@@ -221,7 +221,7 @@ tanru_unit_1 :: SyntaxState s => Syntax s [ADT]
 tanru_unit_1 = adtSyntax "tanru_unit_1" <<< tanru_unit_2 &+& listoptional linkargs
 
 tanru_unit_2 :: SyntaxState s => Syntax s [ADT]
-tanru_unit_2 = adtSyntax "tanru_unit_2" <<< (wrapLeaf gismu) &+& listoptional (concatSome free)
+tanru_unit_2 = adtSyntax "tanru_unit_2" <<< lojban_word (wrapLeaf gismu) &+& listoptional (concatSome free)
     <+> adtSelmaho "GOhA" &+& listoptional (adtSelmaho "RAhO") &+& listoptional (concatSome free)
     <+> adtSelmaho "KE" &+& listoptional (concatSome free) &+& selbri_3 &+& listoptional (adtSelmaho "KEhE" &+& listoptional (concatSome free))
     <+> adtSelmaho "ME" &+& listoptional (concatSome free) &+& sumti &+& listoptional (adtSelmaho "MEhU" &+& listoptional (concatSome free)) &+& listoptional (adtSelmaho "MOI" &+& listoptional (concatSome free))
@@ -396,17 +396,39 @@ interval_property = adtSyntax "interval_property" <<< number &+& adtSelmaho "ROI
     <+> adtSelmaho "ZAhO" &+& listoptional (adtSelmaho "NAI")
 
 free :: SyntaxState s => Syntax s [ADT]
-free = adtSyntax "free" <<< adtSelmaho "SEI" &+& listoptional (concatSome free) &+& listoptional (terms &+& listoptional (adtSelmaho "CU" &+& listoptional (concatSome free))) &+& selbri &+& listoptional (adtSelmaho "SEhU")
-    <+> adtSelmaho "SOI" &+& listoptional (concatSome free) &+& sumti &+& listoptional sumti &+& listoptional (adtSelmaho "SEhU")
-    <+> vocative &+& listoptional relative_clauses &+& selbri &+& listoptional relative_clauses &+& listoptional (adtSelmaho "DOhU")
-    <+> vocative &+& listoptional relative_clauses &+& concatSome (wrapLeaf cmene) &+& listoptional (concatSome free) &+& listoptional relative_clauses &+& listoptional (adtSelmaho "DOhU")
-    <+> vocative &+& listoptional sumti &+& listoptional (adtSelmaho "DOhU")
-    <+> (number
-    <+> lerfu_string) &+& adtSelmaho "MAI"
-    <+> adtSelmaho "TO" &+& text &+& listoptional (adtSelmaho "TOI")
-    <+> adtSelmaho "XI" &+& listoptional (concatSome free) &+& (number
-    <+> lerfu_string) &+& listoptional (adtSelmaho "BOI")
-    <+> adtSelmaho "XI" &+& listoptional (concatSome free) &+& adtSelmaho "VEI" &+& listoptional (concatSome free) &+& mex &+& listoptional (adtSelmaho "VEhO")
+free = adtSyntax "free" <<<
+    adtSelmaho "SEI" &+& listoptional (concatSome free)
+                     &+& listoptional (terms
+                                       &+& listoptional (adtSelmaho "CU"
+                                                         &+& listoptional (concatSome free)))
+                     &+& selbri
+                     &+& listoptional (adtSelmaho "SEhU")
+    <+> adtSelmaho "SOI" &+& listoptional (concatSome free)
+                         &+& sumti
+                         &+& listoptional sumti
+                         &+& listoptional (adtSelmaho "SEhU")
+    <+> vocative &+& listoptional relative_clauses
+                 &+& selbri
+                 &+& listoptional relative_clauses
+                 &+& listoptional (adtSelmaho "DOhU")
+    <+> vocative &+& listoptional relative_clauses
+                 &+& concatSome (wrapLeaf cmene)
+                 &+& listoptional (concatSome free)
+                 &+& listoptional relative_clauses
+                 &+& listoptional (adtSelmaho "DOhU")
+    <+> vocative &+& listoptional sumti
+                 &+& listoptional (adtSelmaho "DOhU")
+    <+> (number <+> lerfu_string) &+& adtSelmaho "MAI"
+    <+> adtSelmaho "TO" &+& text
+                        &+& listoptional (adtSelmaho "TOI")
+    <+> adtSelmaho "XI" &+& listoptional (concatSome free)
+                        &+& (number <+> lerfu_string)
+                        &+& listoptional (adtSelmaho "BOI")
+    <+> adtSelmaho "XI" &+& listoptional (concatSome free)
+                        &+& adtSelmaho "VEI"
+                        &+& listoptional (concatSome free)
+                        &+& mex
+                        &+& listoptional (adtSelmaho "VEhO")
 
 vocative :: SyntaxState s => Syntax s [ADT]
 vocative = adtSyntax "vocative" <<< concatSome ((adtSelmaho "COI" &+& listoptional (adtSelmaho "NAI"))) <&> adtSelmaho "DOI"
@@ -422,8 +444,15 @@ indicator = adtSyntax "indicator" <<<
     <+> adtSelmaho "DAhO"
     <+> adtSelmaho "FUhO"
 
-word :: SyntaxState s => Syntax s [ADT]
-word = adtSyntax "word" <<< listoptional (adtSelmaho "BAhE") &+& any_word &+& listoptional indicators
+lojban_word :: SyntaxState s => Syntax s [ADT] -> Syntax s [ADT]
+lojban_word syn = adtSyntax "word" <<< listoptional (adtSelmaho' "BAhE") &+& syn &+& listoptional indicators
+
+adtSelmaho :: SyntaxState s => String -> Syntax s [ADT]
+adtSelmaho string = lojban_word $ adtSelmaho' string
+
+adtSelmaho' :: SyntaxState s => String -> Syntax s [ADT]
+adtSelmaho' string = wrapLeaf $ selmaho string
+
 
 null :: SyntaxState s => Syntax s [ADT]
 null = adtSyntax "null" <<< any_word &+& adtSelmaho "SI"

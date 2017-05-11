@@ -133,9 +133,6 @@ cmene = Iso f f . anyWord
                then pure word
                else lift $ Left ("'" ++ word ++ "' is not a cmene.")
 
-adtSelmaho :: SyntaxState s => String -> Syntax s [ADT]
-adtSelmaho string = wrapLeaf $ selmaho string
-
 selmaho :: SyntaxState s => String -> Syntax s String
 selmaho s = _selmaho s . anyWord
 
