@@ -1,9 +1,9 @@
 module Lojban
 ( loadWordLists
 , WordList
-, cmavos
-, gismus
-, bai
+, wCmavos
+, wGismus
+, wBai
 , ADT
 , initValidator
 , validateLojban

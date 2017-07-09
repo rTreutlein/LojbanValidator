@@ -94,9 +94,9 @@ handleBAIprefix (b,d) = if t2b `elem` se then (b,t2b ++ ' ' : nd) else (b,nd)
 ----------------------------------------------
 
 loadWordLists :: SyntaxState s => String -> String -> IO (WordList s)
-loadWordLists _ _ = return WordList {cmavos = fmap TS.fromList selmahosLS
-                                    ,gismus = TS.fromList gismuLS
-                                    ,bai = handleBAI baiLS
+loadWordLists _ _ = return WordList {wCmavos = fmap TS.fromList selmahosLS
+                                    ,wGismus = TS.fromList gismuLS
+                                    ,wBai = handleBAI baiLS
                                     }
 
 {-loadWordLists :: SyntaxState s => String -> String -> IO (WordList s)

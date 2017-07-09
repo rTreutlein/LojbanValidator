@@ -30,9 +30,9 @@ type Syntax s a   = SynIso s () a
 --gismus : A wordlist of all gisms
 --bai    : A mapping from bai to their corresponding gismu
 --seed   : A seed for random generation
-data WordList s = WordList { cmavos :: M.Map String StringSet
-                           , gismus :: StringSet
-                           , bai    :: SynIso s String String
+data WordList s = WordList { wCmavos :: M.Map String StringSet
+                           , wGismus :: StringSet
+                           , wBai    :: SynIso s String String
                            }
 --The State
 --sText  : The actuall text to be parsed

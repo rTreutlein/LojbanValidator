@@ -6,7 +6,7 @@ packages:
 - '.'
 - location: #/home/roman/OpenCog/Iso/
    git: https://github.com/rTreutlein/IsoSyntax
-   commit: ec1b4844d1068406b09f211457a6c15fdba476a5
+   commit: 0dc1f0c8c4a7c217558a5011716c2559075b5ba4
   extra-dep: true
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)

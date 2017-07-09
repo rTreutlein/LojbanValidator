@@ -120,7 +120,7 @@ oneOfS f = foldr ((<+>) . f) zeroArrow
 gismu :: SyntaxState s => Syntax s String
 gismu = Iso f f . anyWord
     where f word = do
-                gismu <- asks gismus
+                gismu <- asks wGismus
                 if TS.member word gismu
                     then pure word
                     else lift $ Left ("'" ++ word ++ "' is not a gismu")
@@ -139,7 +139,7 @@ selmaho s = _selmaho s . anyWord
 _selmaho :: SyntaxState s => String -> SynIso s String String
 _selmaho s = Iso f f
     where f word = do
-            cmavo <- asks cmavos
+            cmavo <- asks wCmavos
             let selmaho = findWithDefault TS.empty s cmavo
             if TS.member word selmaho
                 then pure word
