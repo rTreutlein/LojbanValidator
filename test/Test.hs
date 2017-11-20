@@ -9,6 +9,7 @@ import Lojban.WordList
 import Lojban.Syntax
 import Lojban.Syntax.Util
 import Lojban.Syntax.Types
+import Lojban.Syntax.Morph
 
 import Iso hiding (Syntax,SynIso)
 

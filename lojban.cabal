@@ -17,6 +17,7 @@ library
   hs-source-dirs:      src
   exposed-modules:     Lojban
                        , Lojban.Syntax.Util
+                       , Lojban.Syntax.Morph
   other-modules:       Lojban.WordList
                        , Lojban.Syntax
                        , Lojban.Syntax.Types
@@ -35,6 +36,8 @@ library
                        , mtl
                        , cassava
                        , vector
+                       , parallel
+                       , deepseq
   default-language:    Haskell2010
 
 executable lojbanChatBot

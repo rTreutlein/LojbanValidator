@@ -16,20 +16,33 @@ main = do
     putStrLn "Starting Validation"
     validator <- initValidator "cmavo.csv" "gismu.csv"
     sentences <- loadData
-    let validated = parMap rpar (validate validator) sentences
-    validationres <- sequence validated
-    let testResF  = filter id validationres
-    putStrLn $
-        "Of " ++ show (length sentences) ++ " sentences " ++
-        show (length testResF) ++ " have been validated successfully."
-    if length testResF == length sentences
-        then exitSuccess
-        else exitFailure
+    let x = parMap rseq (validate validator) sentences
+    xx <- sequence x
+    return ()
+  --let testResF  = filter id validationres
+  --putStrLn $
+  --    "Of " ++ show (length sentences) ++ " sentences " ++
+  --    show (length testResF) ++ " have been validated successfully."
+  --if length testResF == length sentences
+  --    then exitSuccess
+  --    else exitFailure
+
+mycount :: Either String ADT -> Int -> Int
+mycount ei i = case ei of
+    Left  _ -> i
+    Right _ -> i+1
+
+validate' :: Either String ADT -> IO Bool
+validate' res = do
+    case res of
+        Left e  -> putStrLn e >> putStrLn "" >> return False
+        Right _ -> return True
 
 validate :: (String -> Either String ADT) -> String -> IO Bool
 validate validator text = do
+    print text
     case validator text of
-        Left e  -> print text >> putStrLn e >> putStrLn "" >> return False
+        Left e  -> putStrLn e >> putStrLn "" >> return False
         Right _ -> return True
 
 loadData :: IO [String]

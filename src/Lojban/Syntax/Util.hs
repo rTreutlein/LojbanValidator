@@ -12,7 +12,7 @@ import Data.Maybe
 import Data.Map (findWithDefault)
 
 import Control.Category
-import Control.Arrow
+import Control.Arrow hiding (left,right)
 import Control.Applicative hiding (many,some,optional)
 import Control.Monad
 import Control.Monad.RWS.Class
@@ -66,6 +66,15 @@ mkSynonymIso ls = Iso f g where
     g e = case fst `fmap` find (\(a,b) -> b == e) ls of
             Just r -> pure r
             Nothing -> lift $ Left $ "No synoyme for " ++ show e
+
+notsyn :: SyntaxState s => Syntax s a -> Syntax s String
+notsyn x = (zeroArrow ||| id) . ((left <<< lookahead x) <+> (right . insert []))
+
+syn :: SyntaxState s => Syntax s a -> Syntax s String
+syn x = handle <<< lookahead x
+    where handle = mkIso f g
+          f _ = []
+          g [] = error "syn g Impossible to implement?"
 
 -------------------------------------------------------------------------------
 --Type Util
@@ -122,7 +131,7 @@ gismu = Iso f f . anyWord
     where f word = do
                 gismu <- asks wGismus
                 if TS.member word gismu
-                    then pure word
+                   then pure word
                     else lift $ Left ("'" ++ word ++ "' is not a gismu")
 
 cmene :: SyntaxState s => Syntax s String

@@ -1,5 +1,7 @@
 {-# LANGUAGE RankNTypes                 #-}
 {-# LANGUAGE FlexibleContexts           #-}
+{-# LANGUAGE DeriveGeneric              #-}
+{-# LANGUAGE DeriveAnyClass             #-}
 module Lojban.Syntax.Types where
 
 import Prelude hiding (id,(.),(<*>),(<$>),pure,(*>),(<*),foldl)
@@ -13,7 +15,9 @@ import Iso
 import Syntax (SyntaxState)
 import qualified Syntax
 
-import Control.Monad.RWS
+import Control.Monad.RWS.Strict
+import Control.DeepSeq
+import GHC.Generics (Generic,Generic1)
 
 import qualified Data.ListTrie.Patricia.Set.Ord as TS
 
@@ -46,5 +50,4 @@ instance SyntaxState State where
     setText str sta = sta {sText = str}
 
 data ADT = Leaf String | Node String [ADT]
-         deriving Show
-
+         deriving (Show,Generic,NFData)

@@ -12,6 +12,7 @@ import Control.Monad.RWS
 
 import Lojban.Syntax.Types
 import Lojban.Syntax.Util
+import Lojban.Syntax.Morph hiding (lojban_word,any_word,gismu)
 
 finalCheck :: SyntaxState s => SynIso s a a
 finalCheck = Iso f g where
@@ -366,21 +367,25 @@ tanru_unit_1 = adtSyntax "tanru_unit_1" <<< tanru_unit_2 &+& listoptional linkar
 
 tanru_unit_2 :: SyntaxState s => Syntax s [ADT]
 tanru_unit_2 = adtSyntax "tanru_unit_2" <<<
-    lojban_word (wrapLeaf gismu) &+& listoptional (concatSome free)
+    lojban_word (wrapLeaf (gismu <+> (class_BRIVLA <&& sepSpace))) &+& listoptional (concatSome free)
     <+> adtSelmaho "GOhA" &+& listoptional (adtSelmaho "RAhO")
                           &+& listoptional (concatSome free)
+
     <+> adtSelmaho "KE" &+& listoptional (concatSome free)
                         &+& selbri_3
                         &+& listoptional (adtSelmaho "KEhE"
                                           &+& listoptional (concatSome free))
+
     <+> adtSelmaho "ME" &+& listoptional (concatSome free)
                         &+& sumti
                         &+& listoptional (adtSelmaho "MEhU"
                                           &+& listoptional (concatSome free))
                         &+& listoptional (adtSelmaho "MOI"
                                           &+& listoptional (concatSome free))
+
     <+> (number <+> lerfu_string) &+& adtSelmaho "MOI"
                                   &+& listoptional (concatSome free)
+
     <+> adtSelmaho "NUhA" &+& listoptional (concatSome free)
                           &+& mex_operator
     <+> adtSelmaho "SE" &+& listoptional (concatSome free)
@@ -518,7 +523,8 @@ lerfu_string = adtSyntax "lerfu_string" <<< lerfu_word &+& concatMany ((adtSelma
     <+> lerfu_word))
 
 lerfu_word :: SyntaxState s => Syntax s [ADT]
-lerfu_word = adtSyntax "lerfu_word" <<< adtSelmaho "BY"
+lerfu_word = adtSyntax "lerfu_word"
+    <<< adtSelmaho "BY"
     <+> any_word &+& adtSelmaho "BU"
     <+> adtSelmaho "LAU" &+& lerfu_word
     <+> adtSelmaho "TEI" &+& lerfu_string &+& adtSelmaho "FOI"
