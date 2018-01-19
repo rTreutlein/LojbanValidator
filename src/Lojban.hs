@@ -8,14 +8,18 @@ module Lojban
 , ADT
 , initValidator
 , validateLojban
+, cmevla
+, brivla
 ) where
 
 import Lojban.WordList
 import Lojban.Syntax
+import Lojban.Syntax.Morph
 import Lojban.Syntax.Types
+import Lojban.Syntax.Util
 
 import Control.Monad.IO.Class
-import Control.Monad.RWS.Strict
+import Control.Monad.RWS
 --import Control.Monad.Trans.Class
 
 import Control.Exception

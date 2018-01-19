@@ -1,9 +1,12 @@
+{-# LANGUAGE RankNTypes #-}
 module Lojban.Syntax where
 
 import Prelude hiding (id,(.))
 
 import Iso
 import Syntax hiding (SynIso,Syntax,text)
+
+import Text.Parsers.Frisby (PM,P,runPeg)
 
 import Control.Category
 import Control.Arrow
@@ -13,6 +16,18 @@ import Control.Monad.RWS
 import Lojban.Syntax.Types
 import Lojban.Syntax.Util
 import Lojban.Syntax.Morph hiding (lojban_word,any_word,gismu)
+
+pegToIso :: SyntaxState s2 => (forall s1. PM s1 (P s1 (Maybe String))) -> String -> Syntax s2 String
+pegToIso peg s = handle <<< anyWord
+    where handle = Iso f g
+          f w = case runPeg peg (w++" ") of
+                    Nothing -> lift $ Left $ "Not a " ++ s
+                    Just res -> pure res
+          g = pure
+
+brivla,cmevla :: SyntaxState s => Syntax s String
+brivla = pegToIso class_BRIVLA "brivla"
+cmevla = pegToIso class_CMEVLA "cmevla"
 
 finalCheck :: SyntaxState s => SynIso s a a
 finalCheck = Iso f g where
@@ -29,7 +44,7 @@ lojban = finalCheck . text
 text :: SyntaxState s => Syntax s [ADT]
 text = adtSyntax "text"
     <<< concatMany (adtSelmaho "NAI")
-    &+& concatMany (lojban_word (wrapLeaf cmene)
+    &+& concatMany (lojban_word (wrapLeaf cmevla)
                     &+& listoptional (concatSome free)
                     <+>
                     (indicators <&> concatSome free)
@@ -48,7 +63,7 @@ text_1 = adtSyntax "text_1" <<<
     &+& listoptional paragraphs
 
 paragraphs :: SyntaxState s => Syntax s [ADT]
-paragraphs = adtSyntax "paragraphs" <<< paragraph &+& concatMany ((adtSelmaho "NIhO") &+& listoptional (concatSome free) &+& paragraphs)
+paragraphs = adtSyntax "paragraphs" <<< paragraph &+& concatMany (adtSelmaho "NIhO" &+& listoptional (concatSome free) &+& paragraphs)
 
 paragraph :: SyntaxState s => Syntax s [ADT]
 paragraph = adtSyntax "paragraph" <<<
@@ -266,7 +281,7 @@ sumti_6 = adtSyntax "sumti_6"
 
     <+> adtSelmaho "LA" &+& listoptional (concatSome free)
                         &+& listoptional relative_clauses
-                        &+& concatSome (lojban_word (wrapLeaf cmene))
+                        &+& concatSome (lojban_word (wrapLeaf cmevla))
                         &+& listoptional (concatSome free)
 
     <+> (adtSelmaho "LA" <+> adtSelmaho "LE")
@@ -367,7 +382,7 @@ tanru_unit_1 = adtSyntax "tanru_unit_1" <<< tanru_unit_2 &+& listoptional linkar
 
 tanru_unit_2 :: SyntaxState s => Syntax s [ADT]
 tanru_unit_2 = adtSyntax "tanru_unit_2" <<<
-    lojban_word (wrapLeaf (gismu <+> (class_BRIVLA <&& sepSpace))) &+& listoptional (concatSome free)
+    lojban_word (wrapLeaf (gismu <+> brivla)) &+& listoptional (concatSome free)
     <+> adtSelmaho "GOhA" &+& listoptional (adtSelmaho "RAhO")
                           &+& listoptional (concatSome free)
 
@@ -653,11 +668,13 @@ free = adtSyntax "free" <<<
                  &+& selbri
                  &+& listoptional relative_clauses
                  &+& listoptional (adtSelmaho "DOhU")
+
     <+> vocative &+& listoptional relative_clauses
-                 &+& concatSome (lojban_word (wrapLeaf cmene))
+                 &+& concatSome (lojban_word (wrapLeaf cmevla))
                  &+& listoptional (concatSome free)
                  &+& listoptional relative_clauses
                  &+& listoptional (adtSelmaho "DOhU")
+
     <+> vocative &+& listoptional sumti
                  &+& listoptional (adtSelmaho "DOhU")
     <+> (number <+> lerfu_string) &+& adtSelmaho "MAI"

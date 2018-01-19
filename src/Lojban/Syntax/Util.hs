@@ -58,7 +58,8 @@ stripSpace = mkIso f g where
     f (x:xs) = x : f xs
     g x = x
 
-mkSynonymIso :: (Eq a, Show a, Eq b, Show b,SyntaxState s) => [(a,b)] -> SynIso s a b
+mkSynonymIso :: (Eq a, Show a, Eq b, Show b,SyntaxState s)
+             => [(a,b)] -> SynIso s a b
 mkSynonymIso ls = Iso f g where
     f e = case snd `fmap` find (\(a,b) -> a == e) ls of
             Just r -> pure r
@@ -106,8 +107,12 @@ letter, digit :: SyntaxState s => Syntax s Char
 letter = token (\x -> isLetter x || x=='\'' || x=='.')
 digit  = token isDigit
 
+consonant, vowel :: SyntaxState s => Syntax s Char
+consonant = oneof "bcdfgjklmnprstvxz"
+vowel = oneof "aeiouy"
+
 anyWord :: SyntaxState s => Syntax s String
-anyWord = some letter <&& sepSpace
+anyWord = someTill letter (text " ") <&& skipSpace
 
 any_word :: SyntaxState s => Syntax s [ADT]
 any_word = wrapLeaf anyWord
@@ -144,6 +149,9 @@ cmene = Iso f f . anyWord
 
 selmaho :: SyntaxState s => String -> Syntax s String
 selmaho s = _selmaho s . anyWord
+
+selmahoN :: SyntaxState s => Int -> String -> Syntax s String
+selmahoN i s = _selmaho s . tokenN i
 
 _selmaho :: SyntaxState s => String -> SynIso s String String
 _selmaho s = Iso f f

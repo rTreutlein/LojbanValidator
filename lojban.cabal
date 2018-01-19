@@ -38,7 +38,9 @@ library
                        , vector
                        , parallel
                        , deepseq
+                       , frisby
   default-language:    Haskell2010
+  ghc-options:      -fno-prof-auto
 
 executable lojbanChatBot
   hs-source-dirs:      app
@@ -56,5 +58,7 @@ executable lojban-test
   build-depends:       base
                      , lojban
                      , parallel
+                     , Iso
+                     , mtl
   default-language:    Haskell2010
   ghc-options:      -threaded -rtsopts -with-rtsopts=-N20

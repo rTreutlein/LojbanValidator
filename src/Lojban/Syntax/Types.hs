@@ -15,7 +15,7 @@ import Iso
 import Syntax (SyntaxState)
 import qualified Syntax
 
-import Control.Monad.RWS.Strict
+import Control.Monad.RWS
 import Control.DeepSeq
 import GHC.Generics (Generic,Generic1)
 

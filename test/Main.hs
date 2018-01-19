@@ -1,4 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables#-}
+{-# LANGUAGE PartialTypeSignatures#-}
 
 module Main where
 
@@ -16,16 +17,15 @@ main = do
     putStrLn "Starting Validation"
     validator <- initValidator "cmavo.csv" "gismu.csv"
     sentences <- loadData
-    let x = parMap rseq (validate validator) sentences
-    xx <- sequence x
-    return ()
-  --let testResF  = filter id validationres
-  --putStrLn $
-  --    "Of " ++ show (length sentences) ++ " sentences " ++
-  --    show (length testResF) ++ " have been validated successfully."
-  --if length testResF == length sentences
-  --    then exitSuccess
-  --    else exitFailure
+    let x = map (validate validator) sentences
+    validationres <- sequence x
+    let testResF  = filter id validationres
+    putStrLn $
+        "Of " ++ show (length sentences) ++ " sentences " ++
+        show (length testResF) ++ " have been validated successfully."
+    if length testResF == length sentences
+        then exitSuccess
+        else exitFailure
 
 mycount :: Either String ADT -> Int -> Int
 mycount ei i = case ei of
