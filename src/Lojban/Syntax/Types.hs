@@ -30,12 +30,9 @@ type SynIso s a b = Syntax.SynIso (RWST (WordList s) () s) a b
 type Syntax s a   = SynIso s () a
 
 --The Reader Contents
---cmavos : A map of wordlists given by their grammaticall class
 --gismus : A wordlist of all gisms
 --bai    : A mapping from bai to their corresponding gismu
---seed   : A seed for random generation
-data WordList s = WordList { wCmavos :: M.Map String StringSet
-                           , wGismus :: StringSet
+data WordList s = WordList { wGismus :: StringSet
                            , wBai    :: SynIso s String String
                            }
 --The State

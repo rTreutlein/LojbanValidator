@@ -2,7 +2,6 @@
 module Lojban
 ( loadWordLists
 , WordList
-, wCmavos
 , wGismus
 , wBai
 , ADT
@@ -10,6 +9,9 @@ module Lojban
 , validateLojban
 , cmevla
 , brivla
+, morph
+, sepMorph
+, optMorph
 ) where
 
 import Lojban.WordList
@@ -31,9 +33,9 @@ import qualified Data.Map as M
 
 import Iso hiding (Syntax,SynIso)
 
-initValidator :: String -> String -> IO (String -> Either String ADT)
-initValidator cmavoSrc gismuSrc = do
-    wordlist <- loadWordLists cmavoSrc gismuSrc
+initValidator :: IO (String -> Either String ADT)
+initValidator = do
+    wordlist <- loadWordLists
     return (validateLojban wordlist)
 
 validateLojban :: (WordList State) -> String -> Either String ADT

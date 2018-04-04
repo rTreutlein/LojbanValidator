@@ -20,8 +20,6 @@ concatMany p = concat <$> many p
 
 concatSome p = concat <$> many1 p
 
---class_BRIVLA = fst <$> morphology
---class_CMEVLA = snd <$> morphology
 class_BRIVLA = morphology "brivla"
 class_CMEVLA = morphology "cmevla"
 
@@ -259,7 +257,133 @@ morphology _class = mdo
     class_ZO  <- newRule $ matches (cmavo) <++> (z <++> o) <++> matches (post_word)
     class_ZOI  <- newRule $ matches (cmavo) <++> (z <++> o <++> i // l <++> a <++> h <++> o) <++> matches (post_word)
     class_ZOhU  <- newRule $ matches (cmavo) <++> (z <++> o <++> h <++> u) <++> matches (post_word)
+
     return $ case _class of
-                "brivla" -> (Just <$> class_BRIVLA) // unit Nothing
-                "cmevla" -> (Just <$> class_CMEVLA) // unit Nothing
-                "by" -> (Just <$> class_BY) // unit Nothing
+                "brivla" -> handleP class_BRIVLA
+                "cmevla" -> handleP class_CMEVLA
+                "cmavo"  -> handleP class_CMAVO
+                "A"      -> handleP class_A
+                "BAI"    -> handleP class_BAI
+                "BAhE"   -> handleP class_BAhE
+                "BE"     -> handleP class_BE
+                "BEI"    -> handleP class_BEI
+                "BEhO"   -> handleP class_BEhO
+                "BIhE"   -> handleP class_BIhE
+                "BIhI"   -> handleP class_BIhI
+                "BO"     -> handleP class_BO
+                "BOI"    -> handleP class_BOI
+                "BU"     -> handleP class_BU
+                "BY"     -> handleP class_BY
+                "CAhA"   -> handleP class_CAhA
+                "CAI"    -> handleP class_CAI
+                "CEI"    -> handleP class_CEI
+                "CEhE"   -> handleP class_CEhE
+                "CO"     -> handleP class_CO
+                "COI"    -> handleP class_COI
+                "CU"     -> handleP class_CU
+                "CUhE"   -> handleP class_CUhE
+                "DAhO"   -> handleP class_DAhO
+                "DOI"    -> handleP class_DOI
+                "DOhU"   -> handleP class_DOhU
+                "FA"     -> handleP class_FA
+                "FAhA"   -> handleP class_FAhA
+                "FAhO"   -> handleP class_FAhO
+                "FEhE"   -> handleP class_FEhE
+                "FEhU"   -> handleP class_FEhU
+                "FIhO"   -> handleP class_FIhO
+                "FOI"    -> handleP class_FOI
+                "FUhA"   -> handleP class_FUhA
+                "FUhE"   -> handleP class_FUhE
+                "FUhO"   -> handleP class_FUhO
+                "GA"     -> handleP class_GA
+                "GAhO"   -> handleP class_GAhO
+                "GEhU"   -> handleP class_GEhU
+                "GI"     -> handleP class_GI
+                "GIhA"   -> handleP class_GIhA
+                "GOI"    -> handleP class_GOI
+                "GOhA"   -> handleP class_GOhA
+                "GUhA"   -> handleP class_GUhA
+                "I"      -> handleP class_I
+                "JA"     -> handleP class_JA
+                "JAI"    -> handleP class_JAI
+                "JOhI"   -> handleP class_JOhI
+                "JOI"    -> handleP class_JOI
+                "KE"     -> handleP class_KE
+                "KEhE"   -> handleP class_KEhE
+                "KEI"    -> handleP class_KEI
+                "KI"     -> handleP class_KI
+                "KOhA"   -> handleP class_KOhA
+                "KU"     -> handleP class_KU
+                "KUhE"   -> handleP class_KUhE
+                "KUhO"   -> handleP class_KUhO
+                "LA"     -> handleP class_LA
+                "LAU"    -> handleP class_LAU
+                "LAhE"   -> handleP class_LAhE
+                "LE"     -> handleP class_LE
+                "LEhU"   -> handleP class_LEhU
+                "LI"     -> handleP class_LI
+                "LIhU"   -> handleP class_LIhU
+                "LOhO"   -> handleP class_LOhO
+                "LOhU"   -> handleP class_LOhU
+                "LU"     -> handleP class_LU
+                "LUhU"   -> handleP class_LUhU
+                "MAhO"   -> handleP class_MAhO
+                "MAI"    -> handleP class_MAI
+                "ME"     -> handleP class_ME
+                "MEhU"   -> handleP class_MEhU
+                "MOhE"   -> handleP class_MOhE
+                "MOhI"   -> handleP class_MOhI
+                "MOI"    -> handleP class_MOI
+                "NA"     -> handleP class_NA
+                "NAI"    -> handleP class_NAI
+                "NAhE"   -> handleP class_NAhE
+                "NAhU"   -> handleP class_NAhU
+                "NIhE"   -> handleP class_NIhE
+                "NIhO"   -> handleP class_NIhO
+                "NOI"    -> handleP class_NOI
+                "NU"     -> handleP class_NU
+                "NUhA"   -> handleP class_NUhA
+                "NUhI"   -> handleP class_NUhI
+                "NUhU"   -> handleP class_NUhU
+                "PA"     -> handleP class_PA
+                "PEhE"   -> handleP class_PEhE
+                "PEhO"   -> handleP class_PEhO
+                "PU"     -> handleP class_PU
+                "RAhO"   -> handleP class_RAhO
+                "ROI"    -> handleP class_ROI
+                "SA"     -> handleP class_SA
+                "SE"     -> handleP class_SE
+                "SEI"    -> handleP class_SEI
+                "SEhU"   -> handleP class_SEhU
+                "SI"     -> handleP class_SI
+                "SOI"    -> handleP class_SOI
+                "SU"     -> handleP class_SU
+                "TAhE"   -> handleP class_TAhE
+                "TEhU"   -> handleP class_TEhU
+                "TEI"    -> handleP class_TEI
+                "TO"     -> handleP class_TO
+                "TOI"    -> handleP class_TOI
+                "TUhE"   -> handleP class_TUhE
+                "TUhU"   -> handleP class_TUhU
+                "UI"     -> handleP class_UI
+                "VA"     -> handleP class_VA
+                "VAU"    -> handleP class_VAU
+                "VEI"    -> handleP class_VEI
+                "VEhO"   -> handleP class_VEhO
+                "VUhU"   -> handleP class_VUhU
+                "VEhA"   -> handleP class_VEhA
+                "VIhA"   -> handleP class_VIhA
+                "VUhO"   -> handleP class_VUhO
+                "XI"     -> handleP class_XI
+                "ZAhO"   -> handleP class_ZAhO
+                "ZEhA"   -> handleP class_ZEhA
+                "ZEI"    -> handleP class_ZEI
+                "ZI"     -> handleP class_ZI
+                "ZIhE"   -> handleP class_ZIhE
+                "ZO"     -> handleP class_ZO
+                "ZOI"    -> handleP class_ZOI
+                "ZOhU"   -> handleP class_ZOhU
+                "Y"      -> handleP class_Y
+                a        -> error a
+
+handleP parser = (Just <$> (parser <> rest)) // unit Nothing

@@ -15,7 +15,7 @@ import System.Exit (exitFailure,exitSuccess)
 main :: IO ()
 main = do
     putStrLn "Starting Validation"
-    validator <- initValidator "cmavo.csv" "gismu.csv"
+    validator <- initValidator
     sentences <- loadData
     let x = map (validate validator) sentences
     validationres <- sequence x
@@ -40,7 +40,7 @@ validate' res = do
 
 validate :: (String -> Either String ADT) -> String -> IO Bool
 validate validator text = do
-    print text
+    --print text
     case validator text of
         Left e  -> putStrLn e >> putStrLn "" >> return False
         Right _ -> return True

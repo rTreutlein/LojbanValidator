@@ -5,6 +5,8 @@ module Lojban.Syntax.Util where
 
 import Prelude hiding (id,(.),(<*>),(<$>),(*>),(<*),foldl)
 
+import Text.Parsers.Frisby (PM,P,runPeg)
+
 import Data.List.Split (splitOn)
 import Data.List (nub,partition,intercalate,find,delete)
 import Data.Char (chr,isLetter,isDigit)
@@ -25,6 +27,7 @@ import Syntax hiding (SynIso,Syntax)
 import qualified Syntax
 
 import Lojban.Syntax.Types
+import Lojban.Syntax.Morph
 
 import qualified Data.ListTrie.Patricia.Set.Ord as TS
 
@@ -147,26 +150,28 @@ cmene = Iso f f . anyWord
                then pure word
                else lift $ Left ("'" ++ word ++ "' is not a cmene.")
 
-selmaho :: SyntaxState s => String -> Syntax s String
-selmaho s = _selmaho s . anyWord
+pegToIso :: SyntaxState s2 => (forall s1. PM s1 (P s1 (Maybe (String,String)))) -> String -> Syntax s2 String
+pegToIso peg s = handle <<< anyWord
+    where handle = Iso f g
+          f w = case runPeg peg (w++" ") of
+                    Nothing -> lift $ Left $ "Not a " ++ s
+                    Just (res,rest) -> case rest of
+                        " " -> pure res
+                        _ -> modify (addText rest) >> pure res
+          g = error "Deal with addText"
 
-selmahoN :: SyntaxState s => Int -> String -> Syntax s String
-selmahoN i s = _selmaho s . tokenN i
+brivla,cmevla :: SyntaxState s => Syntax s String
+brivla = pegToIso class_BRIVLA "brivla"
+cmevla = pegToIso class_CMEVLA "cmevla"
 
-_selmaho :: SyntaxState s => String -> SynIso s String String
-_selmaho s = Iso f f
-    where f word = do
-            cmavo <- asks wCmavos
-            let selmaho = findWithDefault TS.empty s cmavo
-            if TS.member word selmaho
-                then pure word
-                else lift $ Left $ "'" ++ word ++ "' is not a cmavo of class: " ++ s
+morph :: SyntaxState s => String -> Syntax s String
+morph s = pegToIso (morphology s) s
 
-sepSelmaho :: SyntaxState s => String -> Syntax s ()
-sepSelmaho s = ignoreAny "sepSelmaho FIXME" . selmaho s
+sepMorph :: SyntaxState s => String -> Syntax s ()
+sepMorph s = ignoreAny "sepMorph FIXME" . morph s
 
-optSelmaho :: SyntaxState s => String -> Syntax s ()
-optSelmaho s = handle . optional (selmaho s)
+optMorph :: SyntaxState s => String -> Syntax s ()
+optMorph s = handle . optional (morph s)
     where handle = Iso f g where
             f _ = pure ()
             g () = pure Nothing

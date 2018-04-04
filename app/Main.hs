@@ -17,7 +17,7 @@ import System.Process
 
 main :: IO ()
 main = do
-    validator <- initValidator "cmavo.csv" "gismu.csv"
+    validator <- initValidator
     mainloop validator
 
 mainloop validator = do

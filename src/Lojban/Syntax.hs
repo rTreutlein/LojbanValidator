@@ -6,8 +6,6 @@ import Prelude hiding (id,(.))
 import Iso
 import Syntax hiding (SynIso,Syntax,text)
 
-import Text.Parsers.Frisby (PM,P,runPeg)
-
 import Control.Category
 import Control.Arrow
 import Control.Monad.Trans.Class
@@ -17,17 +15,11 @@ import Lojban.Syntax.Types
 import Lojban.Syntax.Util
 import Lojban.Syntax.Morph hiding (lojban_word,any_word,gismu)
 
-pegToIso :: SyntaxState s2 => (forall s1. PM s1 (P s1 (Maybe String))) -> String -> Syntax s2 String
-pegToIso peg s = handle <<< anyWord
-    where handle = Iso f g
-          f w = case runPeg peg (w++" ") of
-                    Nothing -> lift $ Left $ "Not a " ++ s
-                    Just res -> pure res
-          g = pure
+adtMorph :: SyntaxState s => String -> Syntax s [ADT]
+adtMorph string = lojban_word $ adtMorph' string
 
-brivla,cmevla :: SyntaxState s => Syntax s String
-brivla = pegToIso class_BRIVLA "brivla"
-cmevla = pegToIso class_CMEVLA "cmevla"
+adtMorph' :: SyntaxState s => String -> Syntax s [ADT]
+adtMorph' string = wrapLeaf $ morph string
 
 finalCheck :: SyntaxState s => SynIso s a a
 finalCheck = Iso f g where
@@ -43,7 +35,7 @@ lojban = finalCheck . text
 
 text :: SyntaxState s => Syntax s [ADT]
 text = adtSyntax "text"
-    <<< concatMany (adtSelmaho "NAI")
+    <<< concatMany (adtMorph "NAI")
     &+& concatMany (lojban_word (wrapLeaf cmevla)
                     &+& listoptional (concatSome free)
                     <+>
@@ -54,21 +46,21 @@ text = adtSyntax "text"
 
 text_1 :: SyntaxState s => Syntax s [ADT]
 text_1 = adtSyntax "text_1" <<<
-    concatMany (adtSelmaho "I" &+& listoptional (jek <+> joik)
-                               &+& listoptional (listoptional stag &+& adtSelmaho "BO")
+    concatMany (adtMorph "I" &+& listoptional (jek <+> joik)
+                               &+& listoptional (listoptional stag &+& adtMorph "BO")
                                &+& listoptional (concatSome free)
                 <+>
-                concatSome (adtSelmaho "NIhO") &+& listoptional (concatSome free)
+                concatSome (adtMorph "NIhO") &+& listoptional (concatSome free)
                )
     &+& listoptional paragraphs
 
 paragraphs :: SyntaxState s => Syntax s [ADT]
-paragraphs = adtSyntax "paragraphs" <<< paragraph &+& concatMany (adtSelmaho "NIhO" &+& listoptional (concatSome free) &+& paragraphs)
+paragraphs = adtSyntax "paragraphs" <<< paragraph &+& concatMany (adtMorph "NIhO" &+& listoptional (concatSome free) &+& paragraphs)
 
 paragraph :: SyntaxState s => Syntax s [ADT]
 paragraph = adtSyntax "paragraph" <<<
     (statement <+> fragment)
-    &+& concatMany ((adtSelmaho "I" &+& listoptional (concatSome free)
+    &+& concatMany ((adtMorph "I" &+& listoptional (concatSome free)
     &+& listoptional (statement <+> fragment)))
 
 statement :: SyntaxState s => Syntax s [ADT]
@@ -76,35 +68,35 @@ statement = adtSyntax "statement" <<< statement_1
     <+> prenex &+& statement
 
 statement_1 :: SyntaxState s => Syntax s [ADT]
-statement_1 = adtSyntax "statement_1" <<< statement_2 &+& concatMany ((adtSelmaho "I" &+& joik_jek &+& listoptional statement_2))
+statement_1 = adtSyntax "statement_1" <<< statement_2 &+& concatMany ((adtMorph "I" &+& joik_jek &+& listoptional statement_2))
 
 statement_2 :: SyntaxState s => Syntax s [ADT]
-statement_2 = adtSyntax "statement_2" <<< statement_3 &+& listoptional (adtSelmaho "I" &+& listoptional (jek
-    <+> joik) &+& listoptional stag &+& adtSelmaho "BO" &+& listoptional (concatSome free) &+& listoptional statement_2)
+statement_2 = adtSyntax "statement_2" <<< statement_3 &+& listoptional (adtMorph "I" &+& listoptional (jek
+    <+> joik) &+& listoptional stag &+& adtMorph "BO" &+& listoptional (concatSome free) &+& listoptional statement_2)
 
 statement_3 :: SyntaxState s => Syntax s [ADT]
 statement_3 = adtSyntax "statement_3" <<< sentence
-    <+> listoptional tag &+& adtSelmaho "TUhE" &+& listoptional (concatSome free) &+& text_1 &+& listoptional (adtSelmaho "TUhU" &+& listoptional (concatSome free))
+    <+> listoptional tag &+& adtMorph "TUhE" &+& listoptional (concatSome free) &+& text_1 &+& listoptional (adtMorph "TUhU" &+& listoptional (concatSome free))
 
 fragment :: SyntaxState s => Syntax s [ADT]
 fragment = adtSyntax "fragment" <<< ek &+& listoptional (concatSome free)
     <+> gihek &+& listoptional (concatSome free)
     <+> quantifier
-    <+> adtSelmaho "NA" &+& listoptional (concatSome free)
-    <+> terms &+& listoptional (adtSelmaho "VAU" &+& listoptional (concatSome free))
+    <+> adtMorph "NA" &+& listoptional (concatSome free)
+    <+> terms &+& listoptional (adtMorph "VAU" &+& listoptional (concatSome free))
     <+> prenex
     <+> relative_clauses
     <+> links
     <+> linkargs
 
 prenex :: SyntaxState s => Syntax s [ADT]
-prenex = adtSyntax "prenex" <<< terms &+& adtSelmaho "ZOhU"
+prenex = adtSyntax "prenex" <<< terms &+& adtMorph "ZOhU"
                                       &+& listoptional (concatSome free)
 
 sentence :: SyntaxState s => Syntax s [ADT]
 sentence = adtSyntax "sentence"
     <<< listoptional (terms
-                      &+& listoptional (adtSelmaho "CU"
+                      &+& listoptional (adtMorph "CU"
                                         &+& listoptional (concatSome free)
                                        )
                      )
@@ -119,10 +111,10 @@ bridi_tail :: SyntaxState s => Syntax s [ADT]
 bridi_tail = adtSyntax "bridi_tail"
     <<< bridi_tail_1 &+& listoptional (gihek
                                         &+& listoptional stag
-                                        &+& adtSelmaho "KE"
+                                        &+& adtMorph "KE"
                                         &+& listoptional (concatSome free)
                                         &+& bridi_tail
-                                        &+& listoptional (adtSelmaho "KEhE"
+                                        &+& listoptional (adtMorph "KEhE"
                                                           &+& listoptional (concatSome free)
                                                          )
                                         &+& tail_terms
@@ -140,7 +132,7 @@ bridi_tail_2 :: SyntaxState s => Syntax s [ADT]
 bridi_tail_2 = adtSyntax "bridi_tail_2"
     <<< bridi_tail_3 &+& listoptional (gihek
                                        &+& listoptional stag
-                                       &+& adtSelmaho "BO"
+                                       &+& adtMorph "BO"
                                        &+& listoptional (concatSome free)
                                        &+& bridi_tail_2
                                        &+& tail_terms)
@@ -155,18 +147,18 @@ gek_sentence = adtSyntax "gek_sentence"
             &+& gik
             &+& subsentence
             &+& tail_terms
-    <+> listoptional tag &+& adtSelmaho "KE"
+    <+> listoptional tag &+& adtMorph "KE"
                          &+& listoptional (concatSome free)
                          &+& gek_sentence
-                         &+& listoptional (adtSelmaho "KEhE"
+                         &+& listoptional (adtMorph "KEhE"
                                            &+& listoptional (concatSome free)
                                           )
-    <+> adtSelmaho "NA" &+& listoptional (concatSome free)
+    <+> adtMorph "NA" &+& listoptional (concatSome free)
                         &+& gek_sentence
 
 tail_terms :: SyntaxState s => Syntax s [ADT]
 tail_terms = adtSyntax "tail_terms" <<< listoptional terms
-                                    &+& listoptional (adtSelmaho "VAU"
+                                    &+& listoptional (adtMorph "VAU"
                                                       &+& listoptional (concatSome free)
                                                      )
 
@@ -175,7 +167,7 @@ terms = adtSyntax "terms" <<< concatSome terms_1
 
 terms_1 :: SyntaxState s => Syntax s [ADT]
 terms_1 = adtSyntax "terms_1"
-    <<< terms_2 &+& concatMany (adtSelmaho "PEhE"
+    <<< terms_2 &+& concatMany (adtMorph "PEhE"
                                 &+& listoptional (concatSome free)
                                 &+& joik_jek
                                 &+& terms_2
@@ -183,7 +175,7 @@ terms_1 = adtSyntax "terms_1"
 
 terms_2 :: SyntaxState s => Syntax s [ADT]
 terms_2 = adtSyntax "terms_2"
-    <<< term &+& concatMany (adtSelmaho "CEhE"
+    <<< term &+& concatMany (adtMorph "CEhE"
                              &+& listoptional (concatSome free)
                              &+& term
                             )
@@ -191,39 +183,39 @@ terms_2 = adtSyntax "terms_2"
 term :: SyntaxState s => Syntax s [ADT]
 term = adtSyntax "term"
     <<< sumti
-    <+> (tag <+> (adtSelmaho "FA"
+    <+> (tag <+> (adtMorph "FA"
                   &+& listoptional (concatSome free))
                  )
         &+&
-        (sumti <+> listoptional (adtSelmaho "KU"
+        (sumti <+> listoptional (adtMorph "KU"
                                  &+& listoptional (concatSome free)
                                 )
         )
     <+> termset
-    <+> adtSelmaho "NA" &+& adtSelmaho "KU"
+    <+> adtMorph "NA" &+& adtMorph "KU"
                         &+& listoptional (concatSome free)
 
 termset :: SyntaxState s => Syntax s [ADT]
 termset = adtSyntax "termset"
-    <<< adtSelmaho "NUhI" &+& listoptional (concatSome free)
+    <<< adtMorph "NUhI" &+& listoptional (concatSome free)
                           &+& gek
                           &+& terms
-                          &+& listoptional (adtSelmaho "NUhU"
+                          &+& listoptional (adtMorph "NUhU"
                                             &+& listoptional (concatSome free)
                                            )
                           &+& gik
                           &+& terms
-                          &+& listoptional (adtSelmaho "NUhU"
+                          &+& listoptional (adtMorph "NUhU"
                                             &+& listoptional (concatSome free)
                                            )
-    <+> adtSelmaho "NUhI" &+& listoptional (concatSome free)
+    <+> adtMorph "NUhI" &+& listoptional (concatSome free)
                           &+& terms
-                          &+& listoptional (adtSelmaho "NUhU"
+                          &+& listoptional (adtMorph "NUhU"
                                             &+& listoptional (concatSome free)
                                            )
 
 sumti :: SyntaxState s => Syntax s [ADT]
-sumti = adtSyntax "sumti" <<< sumti_1 &+& listoptional (adtSelmaho "VUhO"
+sumti = adtSyntax "sumti" <<< sumti_1 &+& listoptional (adtMorph "VUhO"
                                                         &+& listoptional (concatSome free)
                                                         &+& relative_clauses
                                                        )
@@ -232,10 +224,10 @@ sumti_1 :: SyntaxState s => Syntax s [ADT]
 sumti_1 = adtSyntax "sumti_1"
        <<< sumti_2 &+& listoptional ((ek <+> joik)
                                      &+& listoptional stag
-                                     &+& adtSelmaho "KE"
+                                     &+& adtMorph "KE"
                                      &+& listoptional (concatSome free)
                                      &+& sumti
-                                     &+& listoptional (adtSelmaho "KEhE"
+                                     &+& listoptional (adtMorph "KEhE"
                                                        &+& listoptional (concatSome free)
                                                       )
                                     )
@@ -247,7 +239,7 @@ sumti_3 :: SyntaxState s => Syntax s [ADT]
 sumti_3 = adtSyntax "sumti_3"
     <<< sumti_4 &+& listoptional ((ek <+> joik)
                                   &+& listoptional stag
-                                  &+& adtSelmaho "BO"
+                                  &+& adtMorph "BO"
                                   &+& listoptional (concatSome free)
                                   &+& sumti_3
                                  )
@@ -262,45 +254,45 @@ sumti_5 = adtSyntax "sumti_5"
         <<< listoptional quantifier &+& sumti_6
                                     &+& listoptional relative_clauses
         <+> quantifier &+& selbri
-                       &+& listoptional (adtSelmaho "KU"
+                       &+& listoptional (adtMorph "KU"
                                          &+& listoptional (concatSome free)
                                         )
                        &+& listoptional relative_clauses
 
 sumti_6 :: SyntaxState s => Syntax s [ADT]
 sumti_6 = adtSyntax "sumti_6"
-    <<< (adtSelmaho "LAhE" &+& listoptional (concatSome free)
-         <+> adtSelmaho "NAhE" &+& adtSelmaho "BO"
+    <<< (adtMorph "LAhE" &+& listoptional (concatSome free)
+         <+> adtMorph "NAhE" &+& adtMorph "BO"
                                &+& listoptional (concatSome free))
         &+& listoptional relative_clauses &+& sumti
-                                          &+& listoptional (adtSelmaho "LUhU" &+& listoptional (concatSome free))
+                                          &+& listoptional (adtMorph "LUhU" &+& listoptional (concatSome free))
 
-    <+> adtSelmaho "KOhA" &+& listoptional (concatSome free)
+    <+> adtMorph "KOhA" &+& listoptional (concatSome free)
 
-    <+> lerfu_string &+& listoptional (adtSelmaho "BOI" &+& listoptional (concatSome free))
+    <+> lerfu_string &+& listoptional (adtMorph "BOI" &+& listoptional (concatSome free))
 
-    <+> adtSelmaho "LA" &+& listoptional (concatSome free)
+    <+> adtMorph "LA" &+& listoptional (concatSome free)
                         &+& listoptional relative_clauses
                         &+& concatSome (lojban_word (wrapLeaf cmevla))
                         &+& listoptional (concatSome free)
 
-    <+> (adtSelmaho "LA" <+> adtSelmaho "LE")
+    <+> (adtMorph "LA" <+> adtMorph "LE")
             &+& listoptional (concatSome free)
             &+& sumti_tail
-            &+& listoptional (adtSelmaho "KU"
+            &+& listoptional (adtMorph "KU"
                               &+& listoptional (concatSome free)
                              )
-    <+> adtSelmaho "LI" &+& listoptional (concatSome free)
+    <+> adtMorph "LI" &+& listoptional (concatSome free)
                         &+& mex
-                        &+& listoptional (adtSelmaho "LOhO" &+& listoptional (concatSome free))
-    <+> adtSelmaho "ZO" &+& any_word
+                        &+& listoptional (adtMorph "LOhO" &+& listoptional (concatSome free))
+    <+> adtMorph "ZO" &+& any_word
                         &+& listoptional (concatSome free)
-    <+> adtSelmaho "LU" &+& text
-                        &+& listoptional (adtSelmaho "LIhU" &+& listoptional (concatSome free))
-    <+> adtSelmaho "LOhU" &+& concatSome any_word
-                          &+& adtSelmaho "LEhU"
+    <+> adtMorph "LU" &+& text
+                        &+& listoptional (adtMorph "LIhU" &+& listoptional (concatSome free))
+    <+> adtMorph "LOhU" &+& concatSome any_word
+                          &+& adtMorph "LEhU"
                           &+& listoptional (concatSome free)
-    <+> adtSelmaho "ZOI" &+& handleZOI
+    <+> adtMorph "ZOI" &+& handleZOI
                          &+& listoptional (concatSome free)
 
 handleZOI :: SyntaxState s => Syntax s [ADT]
@@ -329,21 +321,21 @@ sumti_tail_1 = adtSyntax "sumti_tail_1"
 
 relative_clauses :: SyntaxState s => Syntax s [ADT]
 relative_clauses = adtSyntax "relative_clauses"
-    <<< relative_clause &+& concatMany (adtSelmaho "ZIhE"
+    <<< relative_clause &+& concatMany (adtMorph "ZIhE"
                                         &+& listoptional (concatSome free)
                                         &+& relative_clause
                                        )
 
 relative_clause :: SyntaxState s => Syntax s [ADT]
 relative_clause = adtSyntax "relative_clause"
-    <<< adtSelmaho "GOI" &+& listoptional (concatSome free)
+    <<< adtMorph "GOI" &+& listoptional (concatSome free)
                          &+& term
-                         &+& listoptional (adtSelmaho "GEhU"
+                         &+& listoptional (adtMorph "GEhU"
                                            &+& listoptional (concatSome free)
                                           )
-    <+> adtSelmaho "NOI" &+& listoptional (concatSome free)
+    <+> adtMorph "NOI" &+& listoptional (concatSome free)
                          &+& subsentence
-                         &+& listoptional (adtSelmaho "KUhO"
+                         &+& listoptional (adtMorph "KUhO"
                                            &+& listoptional (concatSome free)
                                           )
 selbri :: SyntaxState s => Syntax s [ADT]
@@ -351,29 +343,29 @@ selbri = adtSyntax "selbri" <<< listoptional tag &+& selbri_1
 
 selbri_1 :: SyntaxState s => Syntax s [ADT]
 selbri_1 = adtSyntax "selbri_1" <<< selbri_2
-    <+> adtSelmaho "NA" &+& listoptional (concatSome free) &+& selbri
+    <+> adtMorph "NA" &+& listoptional (concatSome free) &+& selbri
 
 selbri_2 :: SyntaxState s => Syntax s [ADT]
-selbri_2 = adtSyntax "selbri_2" <<< selbri_3 &+& listoptional (adtSelmaho "CO" &+& listoptional (concatSome free) &+& selbri_2)
+selbri_2 = adtSyntax "selbri_2" <<< selbri_3 &+& listoptional (adtMorph "CO" &+& listoptional (concatSome free) &+& selbri_2)
 
 selbri_3 :: SyntaxState s => Syntax s [ADT]
 selbri_3 = adtSyntax "selbri_3" <<< concatSome selbri_4
 
 selbri_4 :: SyntaxState s => Syntax s [ADT]
 selbri_4 = adtSyntax "selbri_4" <<< selbri_5 &+& concatMany ((joik_jek &+& selbri_5
-    <+> joik &+& listoptional stag &+& adtSelmaho "KE" &+& listoptional (concatSome free) &+& selbri_3 &+& listoptional (adtSelmaho "KEhE" &+& listoptional (concatSome free))))
+    <+> joik &+& listoptional stag &+& adtMorph "KE" &+& listoptional (concatSome free) &+& selbri_3 &+& listoptional (adtMorph "KEhE" &+& listoptional (concatSome free))))
 
 selbri_5 :: SyntaxState s => Syntax s [ADT]
 selbri_5 = adtSyntax "selbri_5" <<< selbri_6 &+& listoptional ((jek
-    <+> joik) &+& listoptional stag &+& adtSelmaho "BO" &+& listoptional (concatSome free) &+& selbri_5)
+    <+> joik) &+& listoptional stag &+& adtMorph "BO" &+& listoptional (concatSome free) &+& selbri_5)
 
 selbri_6 :: SyntaxState s => Syntax s [ADT]
-selbri_6 = adtSyntax "selbri_6" <<< tanru_unit &+& listoptional (adtSelmaho "BO" &+& listoptional (concatSome free) &+& selbri_6)
-    <+> listoptional (adtSelmaho "NAhE" &+& listoptional (concatSome free)) &+& guhek &+& selbri &+& gik &+& selbri_6
+selbri_6 = adtSyntax "selbri_6" <<< tanru_unit &+& listoptional (adtMorph "BO" &+& listoptional (concatSome free) &+& selbri_6)
+    <+> listoptional (adtMorph "NAhE" &+& listoptional (concatSome free)) &+& guhek &+& selbri &+& gik &+& selbri_6
 
 tanru_unit :: SyntaxState s => Syntax s [ADT]
 tanru_unit = adtSyntax "tanru_unit" <<< tanru_unit_1
-                                    &+& concatMany ((adtSelmaho "CEI"
+                                    &+& concatMany ((adtMorph "CEI"
                                                         &+& listoptional (concatSome free)
                                                         &+& tanru_unit_1))
 
@@ -383,79 +375,79 @@ tanru_unit_1 = adtSyntax "tanru_unit_1" <<< tanru_unit_2 &+& listoptional linkar
 tanru_unit_2 :: SyntaxState s => Syntax s [ADT]
 tanru_unit_2 = adtSyntax "tanru_unit_2" <<<
     lojban_word (wrapLeaf (gismu <+> brivla)) &+& listoptional (concatSome free)
-    <+> adtSelmaho "GOhA" &+& listoptional (adtSelmaho "RAhO")
+    <+> adtMorph "GOhA" &+& listoptional (adtMorph "RAhO")
                           &+& listoptional (concatSome free)
 
-    <+> adtSelmaho "KE" &+& listoptional (concatSome free)
+    <+> adtMorph "KE" &+& listoptional (concatSome free)
                         &+& selbri_3
-                        &+& listoptional (adtSelmaho "KEhE"
+                        &+& listoptional (adtMorph "KEhE"
                                           &+& listoptional (concatSome free))
 
-    <+> adtSelmaho "ME" &+& listoptional (concatSome free)
+    <+> adtMorph "ME" &+& listoptional (concatSome free)
                         &+& sumti
-                        &+& listoptional (adtSelmaho "MEhU"
+                        &+& listoptional (adtMorph "MEhU"
                                           &+& listoptional (concatSome free))
-                        &+& listoptional (adtSelmaho "MOI"
+                        &+& listoptional (adtMorph "MOI"
                                           &+& listoptional (concatSome free))
 
-    <+> (number <+> lerfu_string) &+& adtSelmaho "MOI"
+    <+> (number <+> lerfu_string) &+& adtMorph "MOI"
                                   &+& listoptional (concatSome free)
 
-    <+> adtSelmaho "NUhA" &+& listoptional (concatSome free)
+    <+> adtMorph "NUhA" &+& listoptional (concatSome free)
                           &+& mex_operator
-    <+> adtSelmaho "SE" &+& listoptional (concatSome free)
+    <+> adtMorph "SE" &+& listoptional (concatSome free)
                         &+& tanru_unit_2
-    <+> adtSelmaho "JAI" &+& listoptional (concatSome free)
+    <+> adtMorph "JAI" &+& listoptional (concatSome free)
                          &+& listoptional tag
                          &+& tanru_unit_2
-    <+> any_word &+& concatSome ((adtSelmaho "ZEI" &+& any_word))
-    <+> adtSelmaho "NAhE" &+& listoptional (concatSome free)
+    <+> any_word &+& concatSome ((adtMorph "ZEI" &+& any_word))
+    <+> adtMorph "NAhE" &+& listoptional (concatSome free)
                           &+& tanru_unit_2
-    <+> adtSelmaho "NU" &+& listoptional (adtSelmaho "NAI")
+    <+> adtMorph "NU" &+& listoptional (adtMorph "NAI")
                         &+& listoptional (concatSome free)
-                        &+& concatMany ((joik_jek &+& adtSelmaho "NU"
-                                                  &+& listoptional (adtSelmaho "NAI")
+                        &+& concatMany ((joik_jek &+& adtMorph "NU"
+                                                  &+& listoptional (adtMorph "NAI")
                                                   &+& listoptional (concatSome free)))
                         &+& subsentence
-                        &+& listoptional (adtSelmaho "KEI"
+                        &+& listoptional (adtMorph "KEI"
                                           &+& listoptional (concatSome free))
 
 linkargs :: SyntaxState s => Syntax s [ADT]
 linkargs = adtSyntax "linkargs"
-    <<< adtSelmaho "BE" &+& listoptional (concatSome free)
+    <<< adtMorph "BE" &+& listoptional (concatSome free)
                         &+& term
                         &+& listoptional links
-                        &+& listoptional (adtSelmaho "BEhO"
+                        &+& listoptional (adtMorph "BEhO"
                                           &+& listoptional (concatSome free)
                                          )
 
 links :: SyntaxState s => Syntax s [ADT]
 links = adtSyntax "links"
-    <<< adtSelmaho "BEI" &+& listoptional (concatSome free)
+    <<< adtMorph "BEI" &+& listoptional (concatSome free)
                          &+& term
                          &+& listoptional links
 
 quantifier :: SyntaxState s => Syntax s [ADT]
 quantifier = adtSyntax "quantifier"
-          <<< number &+& listoptional (adtSelmaho "BOI"
+          <<< number &+& listoptional (adtMorph "BOI"
                                        &+& listoptional (concatSome free)
                                       )
-          <+> adtSelmaho "VEI" &+& listoptional (concatSome free)
+          <+> adtMorph "VEI" &+& listoptional (concatSome free)
                                &+& mex
-                               &+& listoptional (adtSelmaho "VEhO"
+                               &+& listoptional (adtMorph "VEhO"
                                                  &+& listoptional (concatSome free)
                                                 )
 
 mex :: SyntaxState s => Syntax s [ADT]
 mex = adtSyntax "mex" <<< mex_1 &+& concatMany ((operator &+& mex_1))
-    <+> adtSelmaho "FUhA" &+& listoptional (concatSome free) &+& rp_expression
+    <+> adtMorph "FUhA" &+& listoptional (concatSome free) &+& rp_expression
 
 mex_1 :: SyntaxState s => Syntax s [ADT]
-mex_1 = adtSyntax "mex_1" <<< mex_2 &+& listoptional (adtSelmaho "BIhE" &+& listoptional (concatSome free) &+& operator &+& mex_1)
+mex_1 = adtSyntax "mex_1" <<< mex_2 &+& listoptional (adtMorph "BIhE" &+& listoptional (concatSome free) &+& operator &+& mex_1)
 
 mex_2 :: SyntaxState s => Syntax s [ADT]
 mex_2 = adtSyntax "mex_2" <<< operand
-    <+> listoptional (adtSelmaho "PEhO" &+& listoptional (concatSome free)) &+& operator &+& concatSome mex_2 &+& listoptional (adtSelmaho "KUhE" &+& listoptional (concatSome free))
+    <+> listoptional (adtMorph "PEhO" &+& listoptional (concatSome free)) &+& operator &+& concatSome mex_2 &+& listoptional (adtMorph "KUhE" &+& listoptional (concatSome free))
 
 rp_expression :: SyntaxState s => Syntax s [ADT]
 rp_expression = adtSyntax "rp_expression" <<< rp_operand &+& rp_operand &+& operator
@@ -466,100 +458,100 @@ rp_operand = adtSyntax "rp_operand" <<< operand
 
 operator :: SyntaxState s => Syntax s [ADT]
 operator = adtSyntax "operator" <<< operator_1 &+& concatMany ((joik_jek &+& operator_1
-    <+> joik &+& listoptional stag &+& adtSelmaho "KE" &+& listoptional (concatSome free) &+& operator &+& listoptional (adtSelmaho "KEhE" &+& listoptional (concatSome free))))
+    <+> joik &+& listoptional stag &+& adtMorph "KE" &+& listoptional (concatSome free) &+& operator &+& listoptional (adtMorph "KEhE" &+& listoptional (concatSome free))))
 
 operator_1 :: SyntaxState s => Syntax s [ADT]
 operator_1 = adtSyntax "operator_1" <<< operator_2
     <+> guhek &+& operator_1 &+& gik &+& operator_2
     <+> operator_2 &+& (jek
-    <+> joik) &+& listoptional stag &+& adtSelmaho "BO" &+& listoptional (concatSome free) &+& operator_1
+    <+> joik) &+& listoptional stag &+& adtMorph "BO" &+& listoptional (concatSome free) &+& operator_1
 
 operator_2 :: SyntaxState s => Syntax s [ADT]
 operator_2 = adtSyntax "operator_2" <<< mex_operator
-    <+> adtSelmaho "KE" &+& listoptional (concatSome free) &+& operator &+& listoptional (adtSelmaho "KEhE" &+& listoptional (concatSome free))
+    <+> adtMorph "KE" &+& listoptional (concatSome free) &+& operator &+& listoptional (adtMorph "KEhE" &+& listoptional (concatSome free))
 
 mex_operator :: SyntaxState s => Syntax s [ADT]
-mex_operator = adtSyntax "mex_operator" <<< adtSelmaho "SE" &+& listoptional (concatSome free) &+& mex_operator
-    <+> adtSelmaho "NAhE" &+& listoptional (concatSome free) &+& mex_operator
-    <+> adtSelmaho "MAhO" &+& listoptional (concatSome free) &+& mex &+& listoptional (adtSelmaho "TEhU" &+& listoptional (concatSome free))
-    <+> adtSelmaho "NAhU" &+& listoptional (concatSome free) &+& selbri &+& listoptional (adtSelmaho "TEhU" &+& listoptional (concatSome free))
-    <+> adtSelmaho "VUhU" &+& listoptional (concatSome free)
+mex_operator = adtSyntax "mex_operator" <<< adtMorph "SE" &+& listoptional (concatSome free) &+& mex_operator
+    <+> adtMorph "NAhE" &+& listoptional (concatSome free) &+& mex_operator
+    <+> adtMorph "MAhO" &+& listoptional (concatSome free) &+& mex &+& listoptional (adtMorph "TEhU" &+& listoptional (concatSome free))
+    <+> adtMorph "NAhU" &+& listoptional (concatSome free) &+& selbri &+& listoptional (adtMorph "TEhU" &+& listoptional (concatSome free))
+    <+> adtMorph "VUhU" &+& listoptional (concatSome free)
 
 operand :: SyntaxState s => Syntax s [ADT]
 operand = adtSyntax "operand" <<< operand_1 &+& listoptional ((ek
-    <+> joik) &+& listoptional stag &+& adtSelmaho "KE" &+& listoptional (concatSome free) &+& operand &+& listoptional (adtSelmaho "KEhE" &+& listoptional (concatSome free)))
+    <+> joik) &+& listoptional stag &+& adtMorph "KE" &+& listoptional (concatSome free) &+& operand &+& listoptional (adtMorph "KEhE" &+& listoptional (concatSome free)))
 
 operand_1 :: SyntaxState s => Syntax s [ADT]
 operand_1 = adtSyntax "operand_1" <<< operand_2 &+& concatMany ((joik_ek &+& operand_2))
 
 operand_2 :: SyntaxState s => Syntax s [ADT]
 operand_2 = adtSyntax "operand_2" <<< operand_3 &+& listoptional ((ek
-    <+> joik) &+& listoptional stag &+& adtSelmaho "BO" &+& listoptional (concatSome free) &+& operand_2)
+    <+> joik) &+& listoptional stag &+& adtMorph "BO" &+& listoptional (concatSome free) &+& operand_2)
 
 operand_3 :: SyntaxState s => Syntax s [ADT]
 operand_3 = adtSyntax "operand_3"
     <<< quantifier
-    <+> lerfu_string &+& listoptional (adtSelmaho "BOI"
+    <+> lerfu_string &+& listoptional (adtMorph "BOI"
                                        &+& listoptional (concatSome free)
                                       )
-    <+> adtSelmaho "NIhE" &+& listoptional (concatSome free)
+    <+> adtMorph "NIhE" &+& listoptional (concatSome free)
                           &+& selbri
-                          &+& listoptional (adtSelmaho "TEhU"
+                          &+& listoptional (adtMorph "TEhU"
                                             &+& listoptional (concatSome free)
                                            )
-    <+> adtSelmaho "MOhE" &+& listoptional (concatSome free)
+    <+> adtMorph "MOhE" &+& listoptional (concatSome free)
                           &+& sumti
-                          &+& listoptional (adtSelmaho "TEhU"
+                          &+& listoptional (adtMorph "TEhU"
                                             &+& listoptional (concatSome free)
                                            )
-    <+> adtSelmaho "JOhI" &+& listoptional (concatSome free)
+    <+> adtMorph "JOhI" &+& listoptional (concatSome free)
                           &+& concatSome mex_2
-                          &+& listoptional (adtSelmaho "TEhU"
+                          &+& listoptional (adtMorph "TEhU"
                                             &+& listoptional (concatSome free)
                                            )
     <+> gek &+& operand
             &+& gik
             &+& operand_3
-    <+> (adtSelmaho "LAhE" &+& listoptional (concatSome free)
-         <+> adtSelmaho "NAhE" &+& adtSelmaho "BO"
+    <+> (adtMorph "LAhE" &+& listoptional (concatSome free)
+         <+> adtMorph "NAhE" &+& adtMorph "BO"
                                &+& listoptional (concatSome free)
         )
         &+& operand
-        &+& listoptional (adtSelmaho "LUhU"
+        &+& listoptional (adtMorph "LUhU"
                           &+& listoptional (concatSome free)
                          )
 
 number :: SyntaxState s => Syntax s [ADT]
 number = adtSyntax "number"
-      <<< adtSelmaho "PA" &+& concatMany ((adtSelmaho "PA" <+> lerfu_word))
+      <<< adtMorph "PA" &+& concatMany ((adtMorph "PA" <+> lerfu_word))
 
 lerfu_string :: SyntaxState s => Syntax s [ADT]
-lerfu_string = adtSyntax "lerfu_string" <<< lerfu_word &+& concatMany ((adtSelmaho "PA"
+lerfu_string = adtSyntax "lerfu_string" <<< lerfu_word &+& concatMany ((adtMorph "PA"
     <+> lerfu_word))
 
 lerfu_word :: SyntaxState s => Syntax s [ADT]
 lerfu_word = adtSyntax "lerfu_word"
-    <<< adtSelmaho "BY"
-    <+> any_word &+& adtSelmaho "BU"
-    <+> adtSelmaho "LAU" &+& lerfu_word
-    <+> adtSelmaho "TEI" &+& lerfu_string &+& adtSelmaho "FOI"
+    <<< adtMorph "BY"
+    <+> any_word &+& adtMorph "BU"
+    <+> adtMorph "LAU" &+& lerfu_word
+    <+> adtMorph "TEI" &+& lerfu_string &+& adtMorph "FOI"
 
 ek :: SyntaxState s => Syntax s [ADT]
-ek = adtSyntax "ek" <<< listoptional (adtSelmaho "NA") &+& listoptional (adtSelmaho "SE") &+& adtSelmaho "A" &+& listoptional (adtSelmaho "NAI")
+ek = adtSyntax "ek" <<< listoptional (adtMorph "NA") &+& listoptional (adtMorph "SE") &+& adtMorph "A" &+& listoptional (adtMorph "NAI")
 
 gihek :: SyntaxState s => Syntax s [ADT]
-gihek = adtSyntax "gihek" <<< listoptional (adtSelmaho "NA") &+& listoptional (adtSelmaho "SE") &+& adtSelmaho "GIhA" &+& listoptional (adtSelmaho "NAI")
+gihek = adtSyntax "gihek" <<< listoptional (adtMorph "NA") &+& listoptional (adtMorph "SE") &+& adtMorph "GIhA" &+& listoptional (adtMorph "NAI")
 
 jek :: SyntaxState s => Syntax s [ADT]
-jek = adtSyntax "jek" <<< listoptional (adtSelmaho "NA") &+& listoptional (adtSelmaho "SE") &+& adtSelmaho "JA" &+& listoptional (adtSelmaho "NAI")
+jek = adtSyntax "jek" <<< listoptional (adtMorph "NA") &+& listoptional (adtMorph "SE") &+& adtMorph "JA" &+& listoptional (adtMorph "NAI")
 
 joik :: SyntaxState s => Syntax s [ADT]
-joik = adtSyntax "joik" <<< listoptional (adtSelmaho "SE") &+& adtSelmaho "JOI" &+& listoptional (adtSelmaho "NAI")
+joik = adtSyntax "joik" <<< listoptional (adtMorph "SE") &+& adtMorph "JOI" &+& listoptional (adtMorph "NAI")
     <+> interval
-    <+> adtSelmaho "GAhO" &+& interval &+& adtSelmaho "GAhO"
+    <+> adtMorph "GAhO" &+& interval &+& adtMorph "GAhO"
 
 interval :: SyntaxState s => Syntax s [ADT]
-interval = adtSyntax "interval" <<< listoptional (adtSelmaho "SE") &+& adtSelmaho "BIhI" &+& listoptional (adtSelmaho "NAI")
+interval = adtSyntax "interval" <<< listoptional (adtMorph "SE") &+& adtMorph "BIhI" &+& listoptional (adtMorph "NAI")
 
 joik_ek :: SyntaxState s => Syntax s [ADT]
 joik_ek = adtSyntax "joik_ek" <<< joik &+& listoptional (concatSome free)
@@ -570,15 +562,15 @@ joik_jek = adtSyntax "joik_jek" <<< joik &+& listoptional (concatSome free)
     <+> jek &+& listoptional (concatSome free)
 
 gek :: SyntaxState s => Syntax s [ADT]
-gek = adtSyntax "gek" <<< listoptional (adtSelmaho "SE") &+& adtSelmaho "GA" &+& listoptional (adtSelmaho "NAI") &+& listoptional (concatSome free)
-    <+> joik &+& adtSelmaho "GI" &+& listoptional (concatSome free)
+gek = adtSyntax "gek" <<< listoptional (adtMorph "SE") &+& adtMorph "GA" &+& listoptional (adtMorph "NAI") &+& listoptional (concatSome free)
+    <+> joik &+& adtMorph "GI" &+& listoptional (concatSome free)
     <+> stag &+& gik
 
 guhek :: SyntaxState s => Syntax s [ADT]
-guhek = adtSyntax "guhek" <<< listoptional (adtSelmaho "SE") &+& adtSelmaho "GUhA" &+& listoptional (adtSelmaho "NAI") &+& listoptional (concatSome free)
+guhek = adtSyntax "guhek" <<< listoptional (adtMorph "SE") &+& adtMorph "GUhA" &+& listoptional (adtMorph "NAI") &+& listoptional (concatSome free)
 
 gik :: SyntaxState s => Syntax s [ADT]
-gik = adtSyntax "gik" <<< adtSelmaho "GI" &+& listoptional (adtSelmaho "NAI") &+& listoptional (concatSome free)
+gik = adtSyntax "gik" <<< adtMorph "GI" &+& listoptional (adtMorph "NAI") &+& listoptional (concatSome free)
 
 tag :: SyntaxState s => Syntax s [ADT]
 tag = adtSyntax "tag" <<< tense_modal &+& concatMany ((joik_jek &+& tense_modal))
@@ -590,132 +582,126 @@ stag = adtSyntax "stag" <<< simple_tense_modal &+& concatMany (((jek
 tense_modal :: SyntaxState s => Syntax s [ADT]
 tense_modal = adtSyntax "tense_modal" <<<
     simple_tense_modal &+& listoptional (concatSome free)
-    <+> adtSelmaho "FIhO" &+& listoptional (concatSome free)
+    <+> adtMorph "FIhO" &+& listoptional (concatSome free)
                           &+& selbri
-                          &+& listoptional (adtSelmaho "FEhU" &+&
+                          &+& listoptional (adtMorph "FEhU" &+&
                                             listoptional (concatSome free))
 
 simple_tense_modal :: SyntaxState s => Syntax s [ADT]
 simple_tense_modal = adtSyntax "simple_tense_modal" <<<
-    listoptional (adtSelmaho "NAhE") &+& listoptional (adtSelmaho "SE")
-                                     &+& adtSelmaho "BAI"
-                                     &+& listoptional (adtSelmaho "NAI")
-                                     &+& listoptional (adtSelmaho "KI")
-    <+> listoptional (adtSelmaho "NAhE") &+&
+    listoptional (adtMorph "NAhE") &+& listoptional (adtMorph "SE")
+                                     &+& adtMorph "BAI"
+                                     &+& listoptional (adtMorph "NAI")
+                                     &+& listoptional (adtMorph "KI")
+    <+> listoptional (adtMorph "NAhE") &+&
         (time &+& listoptional space <+> space &+& listoptional time)
-        <&> adtSelmaho "CAhA" &+& listoptional (adtSelmaho "KI")
-    <+> adtSelmaho "KI"
-    <+> adtSelmaho "CUhE"
+        <&> adtMorph "CAhA" &+& listoptional (adtMorph "KI")
+    <+> adtMorph "KI"
+    <+> adtMorph "CUhE"
 
 time :: SyntaxState s => Syntax s [ADT]
 time = adtSyntax "time" <<<
-    adtSelmaho "ZI"
+    adtMorph "ZI"
     <&> concatSome time_offset
     <&> time_interval
     <&> concatSome interval_property
 
 space :: SyntaxState s => Syntax s [ADT]
 space = adtSyntax "space" <<<
-    adtSelmaho "VA"
+    adtMorph "VA"
     <&> concatSome space_offset
     <&> space_interval
-    <&> (adtSelmaho "MOhI" &+& space_offset)
+    <&> (adtMorph "MOhI" &+& space_offset)
 
 time_offset :: SyntaxState s => Syntax s [ADT]
 time_offset = adtSyntax "time_offset" <<<
-    adtSelmaho "PU" &+& listoptional (adtSelmaho "NAI")
-                    &+& listoptional (adtSelmaho "ZI")
+    adtMorph "PU" &+& listoptional (adtMorph "NAI")
+                    &+& listoptional (adtMorph "ZI")
 
 space_offset :: SyntaxState s => Syntax s [ADT]
 space_offset = adtSyntax "space_offset" <<<
-    adtSelmaho "FAhA" &+& listoptional (adtSelmaho "NAI")
-                      &+& listoptional (adtSelmaho "VA")
+    adtMorph "FAhA" &+& listoptional (adtMorph "NAI")
+                      &+& listoptional (adtMorph "VA")
 
 time_interval :: SyntaxState s => Syntax s [ADT]
 time_interval = adtSyntax "time_interval" <<<
-    adtSelmaho "ZEhA" &+& listoptional (adtSelmaho "PU"
-                      &+& listoptional (adtSelmaho "NAI"))
+    adtMorph "ZEhA" &+& listoptional (adtMorph "PU"
+                      &+& listoptional (adtMorph "NAI"))
 
 space_interval :: SyntaxState s => Syntax s [ADT]
 space_interval = adtSyntax "space_interval" <<<
-    ((adtSelmaho "VEhA" <&> adtSelmaho "VIhA")
-        &+& listoptional (adtSelmaho "FAhA" &+& listoptional (adtSelmaho "NAI")))
+    ((adtMorph "VEhA" <&> adtMorph "VIhA")
+        &+& listoptional (adtMorph "FAhA" &+& listoptional (adtMorph "NAI")))
     <&> space_int_props
 
 space_int_props :: SyntaxState s => Syntax s [ADT]
-space_int_props = adtSyntax "space_int_props" <<< concatSome ((adtSelmaho "FEhE" &+& interval_property))
+space_int_props = adtSyntax "space_int_props" <<< concatSome ((adtMorph "FEhE" &+& interval_property))
 
 interval_property :: SyntaxState s => Syntax s [ADT]
 interval_property = adtSyntax "interval_property" <<<
-    number &+& adtSelmaho "ROI"
-           &+& listoptional (adtSelmaho "NAI")
-    <+> adtSelmaho "TAhE" &+& listoptional (adtSelmaho "NAI")
-    <+> adtSelmaho "ZAhO" &+& listoptional (adtSelmaho "NAI")
+    number &+& adtMorph "ROI"
+           &+& listoptional (adtMorph "NAI")
+    <+> adtMorph "TAhE" &+& listoptional (adtMorph "NAI")
+    <+> adtMorph "ZAhO" &+& listoptional (adtMorph "NAI")
 
 free :: SyntaxState s => Syntax s [ADT]
 free = adtSyntax "free" <<<
-    adtSelmaho "SEI" &+& listoptional (concatSome free)
+    adtMorph "SEI" &+& listoptional (concatSome free)
                      &+& listoptional (terms
-                                       &+& listoptional (adtSelmaho "CU"
+                                       &+& listoptional (adtMorph "CU"
                                                          &+& listoptional (concatSome free)))
                      &+& selbri
-                     &+& listoptional (adtSelmaho "SEhU")
-    <+> adtSelmaho "SOI" &+& listoptional (concatSome free)
+                     &+& listoptional (adtMorph "SEhU")
+    <+> adtMorph "SOI" &+& listoptional (concatSome free)
                          &+& sumti
                          &+& listoptional sumti
-                         &+& listoptional (adtSelmaho "SEhU")
+                         &+& listoptional (adtMorph "SEhU")
     <+> vocative &+& listoptional relative_clauses
                  &+& selbri
                  &+& listoptional relative_clauses
-                 &+& listoptional (adtSelmaho "DOhU")
+                 &+& listoptional (adtMorph "DOhU")
 
     <+> vocative &+& listoptional relative_clauses
                  &+& concatSome (lojban_word (wrapLeaf cmevla))
                  &+& listoptional (concatSome free)
                  &+& listoptional relative_clauses
-                 &+& listoptional (adtSelmaho "DOhU")
+                 &+& listoptional (adtMorph "DOhU")
 
     <+> vocative &+& listoptional sumti
-                 &+& listoptional (adtSelmaho "DOhU")
-    <+> (number <+> lerfu_string) &+& adtSelmaho "MAI"
-    <+> adtSelmaho "TO" &+& text
-                        &+& listoptional (adtSelmaho "TOI")
-    <+> adtSelmaho "XI" &+& listoptional (concatSome free)
+                 &+& listoptional (adtMorph "DOhU")
+    <+> (number <+> lerfu_string) &+& adtMorph "MAI"
+    <+> adtMorph "TO" &+& text
+                        &+& listoptional (adtMorph "TOI")
+    <+> adtMorph "XI" &+& listoptional (concatSome free)
                         &+& (number <+> lerfu_string)
-                        &+& listoptional (adtSelmaho "BOI")
-    <+> adtSelmaho "XI" &+& listoptional (concatSome free)
-                        &+& adtSelmaho "VEI"
+                        &+& listoptional (adtMorph "BOI")
+    <+> adtMorph "XI" &+& listoptional (concatSome free)
+                        &+& adtMorph "VEI"
                         &+& listoptional (concatSome free)
                         &+& mex
-                        &+& listoptional (adtSelmaho "VEhO")
+                        &+& listoptional (adtMorph "VEhO")
 
 vocative :: SyntaxState s => Syntax s [ADT]
-vocative = adtSyntax "vocative" <<< concatSome (adtSelmaho "COI"
-                                                &+& listoptional (adtSelmaho "NAI")
+vocative = adtSyntax "vocative" <<< concatSome (adtMorph "COI"
+                                                &+& listoptional (adtMorph "NAI")
                                                )
-                                <&> adtSelmaho "DOI"
+                                <&> adtMorph "DOI"
 
 indicators :: SyntaxState s => Syntax s [ADT]
 indicators = adtSyntax "indicators" <<<
-    listoptional (adtSelmaho "FUhE") &+& concatSome indicator
+    listoptional (adtMorph "FUhE") &+& concatSome indicator
 
 indicator :: SyntaxState s => Syntax s [ADT]
 indicator = adtSyntax "indicator" <<<
-    (adtSelmaho "UI" <+> adtSelmaho "CAI") &+& listoptional (adtSelmaho "NAI")
-    <+> adtSelmaho "Y"
-    <+> adtSelmaho "DAhO"
-    <+> adtSelmaho "FUhO"
+    (adtMorph "UI" <+> adtMorph "CAI") &+& listoptional (adtMorph "NAI")
+    <+> adtMorph "Y"
+    <+> adtMorph "DAhO"
+    <+> adtMorph "FUhO"
 
 lojban_word :: SyntaxState s => Syntax s [ADT] -> Syntax s [ADT]
 lojban_word syn = adtSyntax "word"
-    <<< listoptional (adtSelmaho' "BAhE") &+& syn &+& listoptional indicators
-
-adtSelmaho :: SyntaxState s => String -> Syntax s [ADT]
-adtSelmaho string = lojban_word $ adtSelmaho' string
-
-adtSelmaho' :: SyntaxState s => String -> Syntax s [ADT]
-adtSelmaho' string = wrapLeaf $ selmaho string
+    <<< listoptional (adtMorph' "BAhE") &+& syn &+& listoptional indicators
 
 null :: SyntaxState s => Syntax s [ADT]
-null = adtSyntax "null" <<< any_word &+& adtSelmaho "SI"
-    <+> text &+& adtSelmaho "SU"
+null = adtSyntax "null" <<< any_word &+& adtMorph "SI"
+    <+> text &+& adtMorph "SU"
