@@ -47,36 +47,46 @@ text = adtSyntax "text"
 text_1 :: SyntaxState s => Syntax s [ADT]
 text_1 = adtSyntax "text_1" <<<
     concatMany (adtMorph "I" &+& listoptional (jek <+> joik)
-                               &+& listoptional (listoptional stag &+& adtMorph "BO")
-                               &+& listoptional (concatSome free)
+                             &+& listoptional (listoptional stag &+& adtMorph "BO")
+                             &+& listoptional (concatSome free)
                 <+>
                 concatSome (adtMorph "NIhO") &+& listoptional (concatSome free)
                )
     &+& listoptional paragraphs
 
 paragraphs :: SyntaxState s => Syntax s [ADT]
-paragraphs = adtSyntax "paragraphs" <<< paragraph &+& concatMany (adtMorph "NIhO" &+& listoptional (concatSome free) &+& paragraphs)
+paragraphs = adtSyntax "paragraphs" <<< paragraph
+           &+& concatMany (adtMorph "NIhO" &+& listoptional (concatSome free)
+                                           &+& paragraphs)
 
 paragraph :: SyntaxState s => Syntax s [ADT]
-paragraph = adtSyntax "paragraph" <<<
-    (statement <+> fragment)
-    &+& concatMany ((adtMorph "I" &+& listoptional (concatSome free)
-    &+& listoptional (statement <+> fragment)))
+paragraph = adtSyntax "paragraph" <<< (statement <+> fragment)
+    &+& concatMany (adtMorph "I" &+& listoptional (concatSome free)
+                                 &+& listoptional (statement <+> fragment))
 
 statement :: SyntaxState s => Syntax s [ADT]
 statement = adtSyntax "statement" <<< statement_1
     <+> prenex &+& statement
 
 statement_1 :: SyntaxState s => Syntax s [ADT]
-statement_1 = adtSyntax "statement_1" <<< statement_2 &+& concatMany ((adtMorph "I" &+& joik_jek &+& listoptional statement_2))
+statement_1 = adtSyntax "statement_1" <<< statement_2
+            &+& concatMany (adtMorph "I" &+& joik_jek
+                                         &+& listoptional statement_2)
 
 statement_2 :: SyntaxState s => Syntax s [ADT]
-statement_2 = adtSyntax "statement_2" <<< statement_3 &+& listoptional (adtMorph "I" &+& listoptional (jek
-    <+> joik) &+& listoptional stag &+& adtMorph "BO" &+& listoptional (concatSome free) &+& listoptional statement_2)
+statement_2 = adtSyntax "statement_2" <<< statement_3
+            &+& listoptional (adtMorph "I" &+& listoptional (jek <+> joik)
+                                           &+& listoptional stag
+                                           &+& adtMorph "BO"
+                                           &+& listoptional (concatSome free)
+                                           &+& listoptional statement_2)
 
 statement_3 :: SyntaxState s => Syntax s [ADT]
 statement_3 = adtSyntax "statement_3" <<< sentence
-    <+> listoptional tag &+& adtMorph "TUhE" &+& listoptional (concatSome free) &+& text_1 &+& listoptional (adtMorph "TUhU" &+& listoptional (concatSome free))
+    <+> listoptional tag &+& adtMorph "TUhE"
+                         &+& listoptional (concatSome free)
+                         &+& text_1
+                         &+& listoptional (adtMorph "TUhU" &+& listoptional (concatSome free))
 
 fragment :: SyntaxState s => Syntax s [ADT]
 fragment = adtSyntax "fragment" <<< ek &+& listoptional (concatSome free)
@@ -394,23 +404,23 @@ tanru_unit_2 = adtSyntax "tanru_unit_2" <<<
                                   &+& listoptional (concatSome free)
 
     <+> adtMorph "NUhA" &+& listoptional (concatSome free)
-                          &+& mex_operator
+                        &+& mex_operator
     <+> adtMorph "SE" &+& listoptional (concatSome free)
-                        &+& tanru_unit_2
+                      &+& tanru_unit_2
     <+> adtMorph "JAI" &+& listoptional (concatSome free)
-                         &+& listoptional tag
-                         &+& tanru_unit_2
+                       &+& listoptional tag
+                       &+& tanru_unit_2
     <+> any_word &+& concatSome ((adtMorph "ZEI" &+& any_word))
     <+> adtMorph "NAhE" &+& listoptional (concatSome free)
-                          &+& tanru_unit_2
+                        &+& tanru_unit_2
     <+> adtMorph "NU" &+& listoptional (adtMorph "NAI")
-                        &+& listoptional (concatSome free)
-                        &+& concatMany ((joik_jek &+& adtMorph "NU"
-                                                  &+& listoptional (adtMorph "NAI")
-                                                  &+& listoptional (concatSome free)))
-                        &+& subsentence
-                        &+& listoptional (adtMorph "KEI"
-                                          &+& listoptional (concatSome free))
+                      &+& listoptional (concatSome free)
+                      &+& concatMany ((joik_jek &+& adtMorph "NU"
+                                                &+& listoptional (adtMorph "NAI")
+                                                &+& listoptional (concatSome free)))
+                      &+& subsentence
+                      &+& listoptional (adtMorph "KEI"
+                                        &+& listoptional (concatSome free))
 
 linkargs :: SyntaxState s => Syntax s [ADT]
 linkargs = adtSyntax "linkargs"

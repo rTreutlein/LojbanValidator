@@ -5,6 +5,8 @@ module Lojban.Syntax.Morph
     ,morphology
     ) where
 
+import Prelude hiding ((<>))
+
 import Text.Parsers.Frisby hiding (matches,doesNotMatch)
 import qualified Text.Parsers.Frisby as FB
 import Control.Exception
