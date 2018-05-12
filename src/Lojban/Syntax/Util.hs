@@ -71,8 +71,11 @@ mkSynonymIso ls = Iso f g where
             Just r -> pure r
             Nothing -> lift $ Left $ "No synoyme for " ++ show e
 
-notsyn :: SyntaxState s => Syntax s a -> Syntax s String
-notsyn x = (zeroArrow ||| id) . ((left <<< lookahead x) <+> (right . insert []))
+--Fails when the Syntax Succeds and the other way arround
+--Either the syn succeds then we fail with the zeroArrow
+--Or the right . insertc succeds because syn failed then we do nothing
+notsyn :: SyntaxState s => Syntax s a -> Syntax s ()
+notsyn x = (zeroArrow ||| id) . ((left <<< lookahead x) <+> (right . insert ()))
 
 syn :: SyntaxState s => Syntax s a -> Syntax s String
 syn x = handle <<< lookahead x
