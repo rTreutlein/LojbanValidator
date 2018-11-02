@@ -30,7 +30,7 @@ import qualified Data.Map as M
 mystate s = State {sText = s}
 
 loadwl = do
-    (wl :: WordList State) <- loadWordLists "cmavo.csv" "gismu.csv"
+    (wl :: WordList State) <- loadWordLists
     return wl
 
 mpag :: WordList State -> Syntax State a -> String -> Either String (a,State,())

@@ -180,8 +180,4 @@ optMorph s = handle . optional (morph s)
             g () = pure Nothing
 
 mword :: SyntaxState s => String -> String -> Syntax s String
-mword m w = handle . (morph m)
-    where handle = Iso f f where
-			f s = case w == s of
-					True -> pure w
-					False -> lift $ Left ("Wrong Word expected " ++ w)
+mword m w = isoFilter ((==) w) . (morph m)

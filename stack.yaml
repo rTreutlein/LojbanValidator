@@ -4,9 +4,9 @@
 # Local packages, usually specified by relative directory name
 packages:
 - '.'
-- location:
+- location: #/home/roman/OpenCog/Iso/
     git: https://github.com/rTreutlein/IsoSyntax
-    commit: ebf2739edfac4568943edad389760386fe6535b5
+    commit: 8d50ccba82ece75143488dba49a7ac3eba709d14
   extra-dep: true
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
